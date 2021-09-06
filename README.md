@@ -2,6 +2,8 @@
 
 Automata simulation with Python.
 
+![Autome logo](./docs/logo.png)
+
 ## Introduction
 
 Autome can help you to simulate some kinds of computational models, i'm still thinking of a good way to represent configurations and inputs, but until then you can play directly with the code if you want.
