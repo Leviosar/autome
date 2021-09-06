@@ -16,6 +16,17 @@ class State:
         self.reject = reject
 
     def __repr__(self):
-        return (
-            f"State(label: {self.label}, accept: {self.accept}, reject: {self.reject})"
+        return f"State(label: {self.label}, accept: {self.accept}, reject: {self.reject}, initial: {self.initial})"
+
+    @classmethod
+    def parse(cls, model: dict) -> "State":
+        """
+        Returns a new instance of State based on the contents of @model. This function was written to be used within Machine.parse
+        """
+        return State(
+            model["label"],
+            model["name"],
+            initial=model["initial"],
+            accept=model["accept"],
+            reject=model["reject"],
         )

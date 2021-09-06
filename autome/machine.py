@@ -2,7 +2,9 @@ from autome.state import State
 from autome.tape import Tape
 from autome.transition import Transition
 from typing import List, Callable, Deque
+from pathlib import Path
 from collections import deque
+import json
 
 
 class Machine:
@@ -31,7 +33,25 @@ class Machine:
     def __repr__(self):
         return f"Machine(states: {len(self.states)}, tapes: {len(self.tapes)})"
 
-    def run(self, steps=False):
+    @classmethod
+    def parse(cls, path: Path) -> "Machine":
+        """
+        Creates an instance of Machine parsed from a json file located at @path that follows the schematics provided by the project (see /machines folder)
+
+        Throws FileNotFoundError if there's no file at @path
+        Throws ValueError if the json file doesn't match the schematics
+        """
+        with open(path, "r", encoding="utf8") as file:
+            model = json.loads(file.read())
+            tapes = [Tape.parse(tape) for tape in model["tapes"]]
+            states = [State.parse(state) for state in model["states"]]
+            transitions = [
+                Transition.parse(transition, states)
+                for transition in model["transitions"]
+            ]
+
+        return Machine(states=states, tapes=tapes, transitions=transitions)
+
     def clone(self) -> "Machine":
         """
         Returns a clone of the calling Turing Machine. The states, transitions and branches will be shallow copies

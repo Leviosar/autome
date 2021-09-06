@@ -1,0 +1,45 @@
+{
+    "states": [
+        {
+            "label": "q0",
+            "name": "q0",
+            "initial": true,
+            "accept": false,
+            "reject": false
+        },
+        {
+            "label": "q1",
+            "name": "q1",
+            "initial": false,
+            "accept": true,
+            "reject": false
+        }
+    ],
+    "tapes": [
+        {"initial_string": "aaabbb"},
+        {"initial_string": ""}
+    ],
+    "transitions": [
+        {
+            "origin": "q0",
+            "destiny": "q0",
+            "reads": ["a", "_"],
+            "writes": ["A", "a"],
+            "moves": ["right", "right"]
+        },
+        {
+            "origin": "q0",
+            "destiny": "q0",
+            "reads": ["b", "_"],
+            "writes": ["B", "b"],
+            "moves": ["right", "right"]
+        },
+        {
+            "origin": "q0",
+            "destiny": "q1",
+            "reads": ["_", "_"],
+            "writes": ["_", "_"],
+            "moves": ["stay", "stay"]
+        }
+    ]
+}
