@@ -1,6 +1,8 @@
 from autome.state import State
+from autome.tape import Tape
 from autome.transition import Transition
-from typing import List
+from typing import List, Callable, Deque
+from collections import deque
 
 
 class Machine:
@@ -12,28 +14,81 @@ class Machine:
     A machine can only have one initial state, but it may have multiple acceptance and reject states. Computation will be stopped as soon as the machine reaches one of those two types of state.
     """
 
-    def __init__(self, states=[], tapes=[], transitions=[]) -> None:
+    def __init__(
+        self, states=[], tapes=[], transitions=[], branches: Deque = None
+    ) -> None:
         self.tapes: List[Tape] = tapes
         self.states: List[State] = states
         self.current_state = next(filter(lambda state: state.initial, self.states))
         self.transitions: List[Transition] = transitions
         self.output = False
 
+        if branches is not None:
+            self.branches = branches
+        else:
+            self.branches: Deque[Machine] = deque([self])
+
     def __repr__(self):
         return f"Machine(states: {len(self.states)}, tapes: {len(self.tapes)})"
 
     def run(self, steps=False):
+    def clone(self) -> "Machine":
+        """
+        Returns a clone of the calling Turing Machine. The states, transitions and branches will be shallow copies
+        while the tapes are clones with differente memory spaces. 
+        
+        States and Transitions are read-only, so a shallow copy is fine.
+        
+        Tapes have write and move operations, so they must be new objects on the new machine.
+
+        The branches must be shared between instances (we call it a "gambiarra")
+        """
+        tapes = [tape.clone() for tape in self.tapes]
+
+        return Machine(
+            states=self.states,
+            tapes=tapes,
+            transitions=self.transitions,
+            branches=self.branches,
+        )
+
+    def execute_transition(self, transition: Transition) -> 'Machine':
+        """
+        Executes a transition into the machine, writing and moving the tapes to apply changes.
+        """
+        for i in range(len(self.tapes)):
+            self.tapes[i].write(transition.writes[i])
+            self.tapes[i].move(transition.moves[i])
+
+        self.current_state = transition.destiny
+
+        return self
+
+    def accepts(self, inputs: List[str], steps=False) -> bool:
+        """
+        Resets the Turing Machine to an entry state and runs the computation for a list of inputs that will be inserted into
+        the machine's tapes.
+        """
+        self.tapes = [Tape(value) for value in inputs]
+        self.current_state = next(filter(lambda state: state.initial, self.states))
+        self.branches: Deque[Machine] = deque([self])
+
+        return self.run(steps)
+
+    def run(self, steps=False) -> bool:
         """
         Runs the computation for the current Turing-Machine.
         If @steps is True, computation will run in a step-by-step mode, use this for debug. To control step by step mode, hit Enter on REPL to go to the next step.
         """
-        while not (self.current_state.accept or self.current_state.reject):
+        output = False
+        while len(self.branches) > 0:
+            branch = self.branches.popleft()
             if steps:
                 input()
-            self.step()
-        return self.output
+            output = branch.step()
+        return output
 
-    def step(self):
+    def step(self) -> bool:
         """
         Runs one step of the computation for the current Turing-Machine.
 
@@ -45,29 +100,19 @@ class Machine:
         it will apply all the changes requested on tapes, then shifts the current state of the machine
         to the destiny of the found transition.
         """
-        if not (self.current_state.accept or self.current_state.reject):
-            symbols = [tape.get() for tape in self.tapes]
+        symbols = [tape.get() for tape in self.tapes]
 
-            matches = list(
-                filter(lambda transition: symbols == transition.reads, self.transitions)
-            )
+        condition: Callable[[Transition], bool] = (
+            lambda transition: symbols == transition.reads
+            and self.current_state == transition.origin
+        )
 
-            if len(matches) == 0:
-                self.current_state = State("qr", "qr", reject=True)
-            elif len(matches) > 1:
-                raise Exception(
-                    "Non-deterministic transition, you're breaking the rules of time and space."
-                )
-            else:
-                transition = matches[0]
+        matches = list(filter(condition, self.transitions))
 
-                for i in range(len(self.tapes)):
-                    self.tapes[i].write(transition.writes[i])
-                    self.tapes[i].move(transition.moves[i])
-
-                self.current_state = transition.destiny
-
-                if self.current_state.reject or self.current_state.accept:
-                    self.output = self.current_state.accept
+        if len(matches) == 0:
+            return self.current_state.accept
         else:
-            self.output = self.current_state.accept
+            for transition in matches[1:]:
+                self.branches.append(self.clone().execute_transition(transition))
+
+            self.branches.append(self.execute_transition(matches[0]))

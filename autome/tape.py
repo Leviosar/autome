@@ -9,25 +9,40 @@ class Tape:
     Tapes may only contain a single char for position, so any input passed as @initial_value will be splitted that way.
     """
 
-    def __init__(self, initial_value: str = ""):
-        self.pointer = 0
-        initial_size = len(list(initial_value))
-        self.data = list(initial_value) + (["_"] * (1000 - initial_size))
+    def __init__(self, initial_value: str = "", pointer: int = 0):
+        self.pointer = pointer
+        self.data = list(initial_value)
 
     def __repr__(self):
-        return json.dumps(self.data)
+        return "  " + " " * (self.pointer * 5) + "↓\n" + json.dumps(self.data)
+
+    def __len__(self):
+        return len(self.data)
+
+    @classmethod
+    def parse(cls, model: dict) -> "Tape":
+        """
+        Returns a new instance of Tape based on the contents of @model. This function was written to be used within Machine.parse
+        """
+        return Tape(initial_value=model["initial_string"])
 
     def get(self):
         """
         Returns the content of the tape at the pointer's position
         """
-        return self.data[self.pointer]
+        if self.pointer < 0 or self.pointer >= len(self):
+            return "_"
+        else:
+            return self.data[self.pointer]
 
     def write(self, value: str):
         """
         Writes the content passed in @value to the tape at the pointer's position
         """
-        self.data[self.pointer] = value
+        if self.pointer < len(self):
+            self.data[self.pointer] = value
+        else:
+            self.data.append(value)
 
     def move(self, direction: Direction):
         """
@@ -37,3 +52,9 @@ class Tape:
             self.pointer -= 1
         elif direction == Direction.RIGHT:
             self.pointer += 1
+
+    def clone(self) -> "Tape":
+        """
+        Returns a clone of the calling tape
+        """
+        return Tape("".join(self.data), pointer=self.pointer)
