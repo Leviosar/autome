@@ -1,0 +1,43 @@
+{
+    "type": "dfa",
+    "title": "cross-machine",
+    "states": [
+        {
+            "name": "0",
+            "initial": true,
+            "accept": false
+        },
+        {
+            "name": "1",
+            "initial": false,
+            "accept": false
+        },
+        {
+            "name": "2",
+            "initial": false,
+            "accept": true
+        }
+    ],
+    "transitions": [
+        {
+            "origin": "0",
+            "destiny": "1",
+            "symbol": "a"
+        },
+        {
+            "origin": "0",
+            "destiny": "2",
+            "symbol": "a"
+        },
+        {
+            "origin": "1",
+            "destiny": "2",
+            "symbol": "b"
+        },
+        {
+            "origin": "2",
+            "destiny": "0",
+            "symbol": "&"
+        }
+    ]
+}

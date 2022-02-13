@@ -1,0 +1,54 @@
+{
+    "type": "dfa",
+    "title": "01-machine",
+    "description": "Accepts all strings that end with '01'",
+    "states": [
+        {
+            "name": "q0",
+            "initial": true,
+            "accept": false
+        },
+        {
+            "name": "q1",
+            "initial": false,
+            "accept": false
+        },
+        {
+            "name": "q2",
+            "initial": false,
+            "accept": true
+        }
+    ],
+    "transitions": [
+        {
+            "origin": "q0",
+            "destiny": "q0",
+            "symbol": "1"
+        },
+        {
+            "origin": "q0",
+            "destiny": "q1",
+            "symbol": "0"
+        },
+        {
+            "origin": "q1",
+            "destiny": "q1",
+            "symbol": "0"
+        },
+        {
+            "origin": "q1",
+            "destiny": "q2",
+            "symbol": "1"
+        },
+        {
+            "origin": "q2",
+            "destiny": "q1",
+            "symbol": "0"
+        },
+        {
+            "origin": "q2",
+            "destiny": "q0",
+            "symbol": "1"
+        }
+    ]
+}

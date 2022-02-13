@@ -1,11 +1,11 @@
 from autome.utils import Direction
 from os import read
-from autome.tape import Tape
-from autome.transition import Transition
-from autome.state import State
+from autome.turing_machine.tape import Tape
+from autome.turing_machine.transition import Transition
+from autome.turing_machine.state import State
 from pathlib import Path
 from xml.etree import ElementTree as ET
-from autome.machine import Machine
+from autome.turing_machine.machine import Machine
 from typing import Callable, List
 
 

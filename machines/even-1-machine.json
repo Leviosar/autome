@@ -1,0 +1,39 @@
+{
+    "type": "dfa",
+    "title": "even-1-machine",
+    "description": "Accepts all strings that have an even number of 1s",
+    "states": [
+        {
+            "name": "0",
+            "initial": true,
+            "accept": true
+        },
+        {
+            "name": "1",
+            "initial": false,
+            "accept": false
+        }
+    ],
+    "transitions": [
+        {
+            "origin": "0",
+            "destiny": "0",
+            "symbol": "0"
+        },
+        {
+            "origin": "0",
+            "destiny": "1",
+            "symbol": "1"
+        },
+        {
+            "origin": "1",
+            "destiny": "1",
+            "symbol": "0"
+        },
+        {
+            "origin": "1",
+            "destiny": "0",
+            "symbol": "1"
+        }
+    ]
+}

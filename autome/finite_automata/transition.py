@@ -1,5 +1,4 @@
-from autome.utils import Direction
-from autome.state import State
+from autome.finite_automata.state import State
 from typing import Callable, List
 
 
@@ -35,9 +34,10 @@ class Transition:
         find_destiny: Callable[[State], str] = (
             lambda state: state.name == model["destiny"]
         )
+        
         destiny = next(filter(find_destiny, states))
 
-        return Transition(origin, destiny, model["symbol"], moves)
+        return Transition(origin, destiny, model["symbol"])
 
     def __eq__(self, other):
         return (
@@ -45,3 +45,7 @@ class Transition:
             and self.destiny == other.destiny
             and self.symbol == other.symbol
         )
+
+    def __hash__(self) -> int:
+        concat = f"{self.destiny.__hash__()}.{self.origin.__hash__()}.{self.symbol.__hash__()}"
+        return hash(concat)
