@@ -1,0 +1,47 @@
+from autome.utils import Direction
+from autome.state import State
+from typing import Callable, List
+
+
+class Transition:
+    """
+    A transition between two states in a Finite Automata. Any Transition has an origin state, a
+    destiny origin and a trigger symbol.
+    """
+
+    def __init__(
+        self,
+        origin: State,
+        destiny: State,
+        symbol: str,
+    ) -> None:
+        self.origin = origin
+        self.destiny = destiny
+        self.symbol = symbol
+
+    def __repr__(self):
+        return f"Transition({self.origin.name} → {self.destiny.name}) : {self.symbol}"
+
+    @classmethod
+    def parse(cls, model: dict, states: List[State]) -> "Transition":
+        """
+        Returns a new instance of Transition based on the contents of @model. This function was written to be used within Machine.parse
+        """
+        find_origin: Callable[[State], str] = (
+            lambda state: state.name == model["origin"]
+        )
+        origin = next(filter(find_origin, states))
+
+        find_destiny: Callable[[State], str] = (
+            lambda state: state.name == model["destiny"]
+        )
+        destiny = next(filter(find_destiny, states))
+
+        return Transition(origin, destiny, model["symbol"], moves)
+
+    def __eq__(self, other):
+        return (
+            self.origin == other.origin
+            and self.destiny == other.destiny
+            and self.symbol == other.symbol
+        )
