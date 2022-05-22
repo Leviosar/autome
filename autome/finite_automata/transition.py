@@ -34,7 +34,7 @@ class Transition:
         find_destiny: Callable[[State], str] = (
             lambda state: state.name == model["destiny"]
         )
-        
+
         destiny = next(filter(find_destiny, states))
 
         return Transition(origin, destiny, model["symbol"])

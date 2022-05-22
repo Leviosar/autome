@@ -54,10 +54,10 @@ class BaseMachine:
     def clone(self) -> "Machine":
         """
         Returns a clone of the calling Turing Machine. The states, transitions and branches will be shallow copies
-        while the tapes are clones with differente memory spaces. 
-        
+        while the tapes are clones with differente memory spaces.
+
         States and Transitions are read-only, so a shallow copy is fine.
-        
+
         Tapes have write and move operations, so they must be new objects on the new machine.
 
         The branches must be shared between instances (we call it a "gambiarra")

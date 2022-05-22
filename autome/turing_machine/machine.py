@@ -55,10 +55,10 @@ class Machine:
     def clone(self) -> "Machine":
         """
         Returns a clone of the calling Turing Machine. The states, transitions and branches will be shallow copies
-        while the tapes are clones with differente memory spaces. 
-        
+        while the tapes are clones with differente memory spaces.
+
         States and Transitions are read-only, so a shallow copy is fine.
-        
+
         Tapes have write and move operations, so they must be new objects on the new machine.
 
         The branches must be shared between instances (we call it a "gambiarra")
@@ -72,7 +72,7 @@ class Machine:
             branches=self.branches,
         )
 
-    def execute_transition(self, transition: Transition) -> 'Machine':
+    def execute_transition(self, transition: Transition) -> "Machine":
         """
         Executes a transition into the machine, writing and moving the tapes to apply changes.
         """
