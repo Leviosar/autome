@@ -1,5 +1,3 @@
-from turtle import forward
-
 from autome.regex import Token, TokenType
 
 from autome.regex.nodes import (
