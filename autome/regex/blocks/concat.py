@@ -18,16 +18,14 @@ class ConcatenationAutomata(NonDeterministicFiniteAutomata):
         temp_a = a.clone()
         temp_b = b.clone()
 
-        print(temp_a)
-        print(temp_b)
 
         new = []
         # All transitions going from the initial state of the second DFA now should start on the
         # final state of the first DFA
+        for transition in temp_b.transitions:
+            if transition.origin != temp_b.initial():
+                continue
 
-        starting_from_old = lambda transition: transition.origin == temp_b.initial()
-
-        for transition in filter(starting_from_old, temp_b.transitions):
             for state in temp_a.final():
                 # Handles the case where a initial state has transitions to itself
                 destiny = (
@@ -36,8 +34,12 @@ class ConcatenationAutomata(NonDeterministicFiniteAutomata):
                     else state
                 )
                 new.append(Transition(state, transition.destiny, transition.symbol))
-            temp_b.transitions.remove(transition)
 
+        for transition in temp_b.transitions:
+            if transition.origin != temp_b.initial():
+                continue
+            temp_b.transitions.remove(transition)
+            
         # Now we can remove the initial state of the second DFA
         temp_b.states.remove(temp_b.initial())
 
