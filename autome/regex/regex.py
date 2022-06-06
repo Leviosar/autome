@@ -11,4 +11,4 @@ class Regex:
         self.interpreter = Interpreter()
 
     def match(self, test) -> bool:
-        return self.interpreter.run(self.tree).accepts(test)
+        return self.interpreter.run(self.tree).determinize().accepts(test)
