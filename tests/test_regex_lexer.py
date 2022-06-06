@@ -1,5 +1,5 @@
 import itertools
-from autome.regular_expression.lexer import Lexer, Token, TokenType
+from autome.regex.lexer import Lexer, Token, TokenType
 
 
 def test_regex_lexer():

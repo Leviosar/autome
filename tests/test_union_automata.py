@@ -1,4 +1,4 @@
-from autome.regular_expression.blocks import SymbolAutomata, UnionAutomata
+from autome.regex.blocks import SymbolAutomata, UnionAutomata
 
 
 def test_union_automata():

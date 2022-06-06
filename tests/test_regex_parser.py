@@ -1,6 +1,6 @@
-from autome.regular_expression.lexer import Lexer
-from autome.regular_expression.nodes import ConcatNode, KleeneClosureNode, SymbolNode, UnionNode
-from autome.regular_expression.parser import Parser
+from autome.regex.lexer import Lexer
+from autome.regex.nodes import ConcatNode, KleeneClosureNode, SymbolNode, UnionNode
+from autome.regex.parser import Parser
 
 
 def test_regex_parser():

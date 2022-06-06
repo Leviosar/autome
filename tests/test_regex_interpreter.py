@@ -1,5 +1,5 @@
-from autome.regular_expression import Lexer, Parser, Interpreter
-from autome.regular_expression.nodes import ConcatNode, KleeneClosureNode, SymbolNode, UnionNode
+from autome.regex import Lexer, Parser, Interpreter
+from autome.regex.nodes import ConcatNode, KleeneClosureNode, SymbolNode, UnionNode
 from itertools import tee
 
 

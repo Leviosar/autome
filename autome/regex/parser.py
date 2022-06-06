@@ -1,10 +1,10 @@
 from turtle import forward
 
-from autome.regular_expression import (
+from autome.regex import (
     Token, TokenType
 )
 
-from autome.regular_expression.nodes import (
+from autome.regex.nodes import (
     ConcatNode,
     KleeneClosureNode,
     ParserNode,

@@ -1,4 +1,4 @@
-from autome.regular_expression import Lexer, Parser, Interpreter
+from autome.regex import Lexer, Parser, Interpreter
 
 class Regex:
     def __init__(self, expression) -> None:

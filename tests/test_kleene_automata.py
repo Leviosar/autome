@@ -1,4 +1,4 @@
-from autome.regular_expression.blocks import (
+from autome.regex.blocks import (
     SymbolAutomata,
     KleeneAutomata,
     ConcatenationAutomata,

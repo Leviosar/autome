@@ -1,4 +1,4 @@
-from autome.regular_expression.blocks import SymbolAutomata
+from autome.regex.blocks import SymbolAutomata
 
 
 def test_symbol_automata():

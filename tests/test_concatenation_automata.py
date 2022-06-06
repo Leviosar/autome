@@ -1,8 +1,8 @@
-# from autome.regular_expression.symbol_automata import SymbolAutomata
-# from autome.regular_expression.concatenation_automata import ConcatenationAutomata
+# from autome.regex.symbol_automata import SymbolAutomata
+# from autome.regex.concatenation_automata import ConcatenationAutomata
 
-from autome.regular_expression.blocks import SymbolAutomata, ConcatenationAutomata
-from autome.regular_expression.blocks.kleene import KleeneAutomata
+from autome.regex.blocks import SymbolAutomata, ConcatenationAutomata
+from autome.regex.blocks.kleene import KleeneAutomata
 
 
 def test_concatenation_automata():
