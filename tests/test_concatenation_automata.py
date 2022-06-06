@@ -16,18 +16,16 @@ def test_concatenation_automata():
 
     # Testing simple concatenation
     machine = ConcatenationAutomata(a, b)
-    # assert machine.accepts("ab")
-    # assert not machine.accepts("aab")
-    # assert not machine.accepts("ba")
-    # assert not machine.accepts("b")
-    # assert not machine.accepts("a")
-    # assert not machine.accepts("")
-    # assert not machine.accepts("&")
+    assert machine.accepts("ab")
+    assert not machine.accepts("aab")
+    assert not machine.accepts("ba")
+    assert not machine.accepts("b")
+    assert not machine.accepts("a")
+    assert not machine.accepts("")
+    assert not machine.accepts("&")
 
     # Testing compound concatenation
     machine = ConcatenationAutomata(machine, c)
-    trick = KleeneAutomata(c)
-    machine = ConcatenationAutomata(machine, trick)
 
     assert machine.accepts("abc")
     assert not machine.accepts("aab")
@@ -39,12 +37,12 @@ def test_concatenation_automata():
     assert not machine.accepts("&")
 
     # Testing self concatenation
-    # machine = ConcatenationAutomata(a, a)
-    # assert machine.accepts("aa")
-    # assert not machine.accepts("aab")
-    # assert not machine.accepts("bac")
-    # assert not machine.accepts("b")
-    # assert not machine.accepts("a")
-    # assert not machine.accepts("c")
-    # assert not machine.accepts("")
-    # assert not machine.accepts("&")
+    machine = ConcatenationAutomata(a, a)
+    assert machine.accepts("aa")
+    assert not machine.accepts("aab")
+    assert not machine.accepts("bac")
+    assert not machine.accepts("b")
+    assert not machine.accepts("a")
+    assert not machine.accepts("c")
+    assert not machine.accepts("")
+    assert not machine.accepts("&")

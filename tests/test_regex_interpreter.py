@@ -7,25 +7,26 @@ def test_regex_interpreter():
     lexer = Lexer("(a|b)* (c|d)*")
 
     tokens = lexer.generate_tokens()
-
+ 
     parser = Parser(tokens)
 
     tree = parser.parse()
-
+    
     interpreter = Interpreter()
 
-    machine = interpreter.run(tree)
-    print("break")
+    machine = interpreter.run(tree).determinize()
+
     print(machine)
-    print(machine.determinize())
+
     assert machine.accepts("")
-    assert machine.accepts("aaacdcdcd")
-    assert machine.accepts("abcd")
-    assert machine.accepts("badc")
-    assert machine.accepts("bbbaaaddddccc")
+    assert machine.accepts("aaaabbbb")
+    assert machine.accepts("abbababa")
+    assert machine.accepts("ab")
     assert machine.accepts("a")
     assert machine.accepts("b")
-    assert machine.accepts("c")
-    assert machine.accepts("d")
+    assert machine.accepts("abcd")
+    assert machine.accepts("ccccc")
+    assert machine.accepts("ddddd")
+    assert machine.accepts("cccccddddd")
     assert not machine.accepts("acbd")
     assert not machine.accepts("ddddbbbccccaaaa")

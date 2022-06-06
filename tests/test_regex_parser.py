@@ -4,18 +4,25 @@ from autome.regex.parser import Parser
 
 
 def test_regex_parser():
-    lexer = Lexer("(a|b) b*")
+    lexer = Lexer("(a|b)* (c|d)*")
 
     tokens = lexer.generate_tokens()
 
     parser = Parser(tokens)
 
     expected = ConcatNode(
-        UnionNode(
-            SymbolNode("a"),
-            SymbolNode("b"),
+        KleeneClosureNode(
+            UnionNode(
+                SymbolNode("a"),
+                SymbolNode("b"),
+            ),
         ),
-        KleeneClosureNode(SymbolNode("b")),
+        KleeneClosureNode(
+            UnionNode(
+                SymbolNode("c"),
+                SymbolNode("d"),
+            ),
+        ),
     )
 
     tree = parser.parse()
