@@ -41,7 +41,7 @@ def test_fda_intersection():
     assert not second_machine.accepts("1111001")
 
     intersection = first_machine & second_machine
-    print(intersection)
+
     assert isinstance(intersection, DeterministicFiniteAutomata)
     assert not intersection.accepts("11")
     assert not intersection.accepts("0000000000000001")

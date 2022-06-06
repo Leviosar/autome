@@ -4,7 +4,6 @@ import pdb
 from turtle import pd
 from tabulate import tabulate
 from typing import Callable, List, Set, Tuple
-
 from autome.finite_automata.state import State
 from autome.finite_automata.transition import Transition
 from autome.base_machine import BaseMachine
@@ -86,12 +85,8 @@ class DeterministicFiniteAutomata(BaseMachine):
 
         for character in word:
             result = self.step(character)
-            print(result)
-            input()
             if not result:
                 return False
-
-        print(self.current_state)
 
         return self.current_state.accept
 
@@ -263,6 +258,25 @@ class DeterministicFiniteAutomata(BaseMachine):
                 state.accept = False
 
         return result
+
+    def clone(self) -> "DeterministicFiniteAutomata":
+        mapping = {}
+
+        new_states = []
+        new_transitions = []
+
+        for original in self.states:
+            new = State(accept=original.accept, initial=original.initial)
+            mapping[original] = new
+            new_states.append(new)
+
+        for original in self.transitions:
+            new = Transition(
+                mapping[original.origin], mapping[original.destiny], original.symbol
+            )
+            new_transitions.append(new)
+
+        return DeterministicFiniteAutomata(new_states, new_transitions)
 
     # Dunder methods to allow operator overloading
     def __or__(self, other):

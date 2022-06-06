@@ -1,11 +1,18 @@
 from pathlib import Path
-from autome.finite_automata import DeterministicFiniteAutomata, NonDeterministicFiniteAutomata, State, Transition, JFlapConverter, JSONConverter
+from autome.finite_automata import (
+    DeterministicFiniteAutomata,
+    NonDeterministicFiniteAutomata,
+    State,
+    Transition,
+    JFlapConverter,
+    JSONConverter,
+)
 
 first_machine = JSONConverter.parse(source=Path("./machines/01-machine.json"))
-print(first_machine)
+u_machine = first_machine | first_machine
+JFlapConverter.save(u_machine, "./machines/u-machine.parsed.jff")
 
 assert isinstance(first_machine, DeterministicFiniteAutomata)
-
 # First we are testing 01-machine by itself
 # assert first_machine.accepts("01")
 # assert first_machine.accepts("0000000000000001")
@@ -32,7 +39,6 @@ assert isinstance(second_machine, DeterministicFiniteAutomata)
 # assert not second_machine.accepts("1111001")
 
 intersection = first_machine & second_machine
-print(intersection)
 assert isinstance(intersection, DeterministicFiniteAutomata)
 assert not intersection.accepts("11")
 # assert not intersection.accepts("0000000000000001")

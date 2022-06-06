@@ -1,7 +1,6 @@
 from os import stat
 from typing import List
 from itertools import count
-import uuid
 
 
 class State:
@@ -11,12 +10,15 @@ class State:
     A possible State of a Finite Automata.
     """
 
-    def __init__(self, name: str, initial=False, accept=False) -> None:
-        self.id: str = id
-        self.name: str = name
+    def __init__(self, name: str = None, initial=False, accept=False) -> None:
         self.initial: bool = initial
         self.accept: bool = accept
         self.id = next(self._ids)
+
+        if name is None:
+            self.name = f"q{self.id}"
+        else:
+            self.name: str = name
 
     @classmethod
     def parse(cls, model: dict) -> "State":
