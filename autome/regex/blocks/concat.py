@@ -17,20 +17,24 @@ class ConcatenationAutomata(NonDeterministicFiniteAutomata):
         # Using deep copys to avoid modifying the original automata.
         temp_a = a.clone()
         temp_b = b.clone()
-        
+
         print(temp_a)
         print(temp_b)
-        
+
         new = []
         # All transitions going from the initial state of the second DFA now should start on the
         # final state of the first DFA
-        
+
         starting_from_old = lambda transition: transition.origin == temp_b.initial()
-        
+
         for transition in filter(starting_from_old, temp_b.transitions):
             for state in temp_a.final():
                 # Handles the case where a initial state has transitions to itself
-                destiny = transition.destiny if transition.destiny != temp_b.initial() else state
+                destiny = (
+                    transition.destiny
+                    if transition.destiny != temp_b.initial()
+                    else state
+                )
                 new.append(Transition(state, transition.destiny, transition.symbol))
             temp_b.transitions.remove(transition)
 

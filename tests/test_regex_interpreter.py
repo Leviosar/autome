@@ -7,15 +7,15 @@ def test_regex_interpreter():
     lexer = Lexer("(a|b)* (c|d)*")
 
     tokens = lexer.generate_tokens()
-    
+
     parser = Parser(tokens)
-    
+
     tree = parser.parse()
 
     interpreter = Interpreter()
 
     machine = interpreter.run(tree)
-    print('break')
+    print("break")
     print(machine)
     print(machine.determinize())
     assert machine.accepts("")

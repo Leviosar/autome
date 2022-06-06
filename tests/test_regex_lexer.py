@@ -19,5 +19,5 @@ def test_regex_lexer():
             Token(TokenType.SYMBOL, "c"),
         ]
     )
-    
+
     assert all(a == b for a, b in itertools.zip_longest(tokens, expected))

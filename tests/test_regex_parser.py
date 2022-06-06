@@ -7,19 +7,17 @@ def test_regex_parser():
     lexer = Lexer("(a|b) b*")
 
     tokens = lexer.generate_tokens()
-    
+
     parser = Parser(tokens)
-    
+
     expected = ConcatNode(
         UnionNode(
-            SymbolNode('a'),
-            SymbolNode('b'),
+            SymbolNode("a"),
+            SymbolNode("b"),
         ),
-        KleeneClosureNode(
-            SymbolNode('b')
-        )
+        KleeneClosureNode(SymbolNode("b")),
     )
-    
+
     tree = parser.parse()
-    
+
     assert tree == expected

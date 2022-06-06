@@ -12,7 +12,7 @@ def test_kleene_automata():
     """
     a = SymbolAutomata("a")
     b = SymbolAutomata("b")
-    
+
     machine = KleeneAutomata(a).determinize()
 
     assert machine.accepts("aa")
