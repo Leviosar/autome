@@ -1,47 +1,29 @@
+import json
 from pathlib import Path
-from autome.finite_automata import (
-    DeterministicFiniteAutomata,
-    NonDeterministicFiniteAutomata,
-    State,
-    Transition,
-    JFlapConverter,
-    JSONConverter,
-)
+import click
+from autome.finite_automata.parsers import JSONConverter
+from autome.interface import Lexico
 
-first_machine = JSONConverter.parse(source=Path("./machines/01-machine.json"))
-u_machine = first_machine | first_machine
-JFlapConverter.save(u_machine, "./machines/u-machine.parsed.jff")
+@click.command()
+@click.argument("input", type=click.Path(exists=True, path_type=Path))
+@click.argument("source", type=click.Path(exists=True, path_type=Path))
+@click.option("--output", type=click.Path(path_type=Path))
+def lexico(input: Path, source: Path, output: Path):
+    match input.suffixes:
+        case ['.automata', '.json']:
+            automata = JSONConverter.parse(input)
+            lexer = Lexico(automata)
+        case ['.lexer', '.json']:
+            lexer = Lexico(input)
+        case other:
+            print(f"Invalid input format: {''.join(other)}")
+            exit()
 
-assert isinstance(first_machine, DeterministicFiniteAutomata)
-# First we are testing 01-machine by itself
-# assert first_machine.accepts("01")
-# assert first_machine.accepts("0000000000000001")
-# assert not first_machine.accepts("0000000000000011")
-# assert not first_machine.accepts("1")
-# assert not first_machine.accepts("0")
-# assert not first_machine.accepts("10")
-# assert not first_machine.accepts("")
-# assert first_machine.accepts("101")
+    lexer.run(source)
+    
+    if output is not None:
+        converter = JSONConverter()
+        converter.save(lexer.lexer, output)
 
-second_machine = JSONConverter.parse(source=Path("./machines/even-1-machine.json"))
-
-assert isinstance(second_machine, DeterministicFiniteAutomata)
-
-# Now we test if even-1 machine works
-# assert second_machine.accepts("")
-# assert second_machine.accepts("11")
-# assert second_machine.accepts("110")
-# assert second_machine.accepts("11000000000")
-# assert second_machine.accepts("11000010010")
-# assert second_machine.accepts("00")
-# assert not second_machine.accepts("001")
-# assert not second_machine.accepts("11001")
-# assert not second_machine.accepts("1111001")
-
-intersection = first_machine & second_machine
-assert isinstance(intersection, DeterministicFiniteAutomata)
-assert not intersection.accepts("11")
-# assert not intersection.accepts("0000000000000001")
-# assert intersection.accepts("00001000000000001")
-# assert not intersection.accepts("")
-# assert not intersection.accepts("00")
+if __name__ == '__main__':
+    lexico()

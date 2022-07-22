@@ -1,0 +1,24 @@
+{
+    "version": "1.0.0",
+    "reserved-keywords": ["if", "else", "while", "return", "const"],
+    "definitions": [
+        {"name": "digit", "expression": "0|1|2|3|4|5|6|7|8|9"},
+        {"name": "letter", "expression": "a|b|c|d|e"},
+        {"name": "int_t", "expression": "i n t"},
+        {"name": "bool_t", "expression": "b o o l"},
+        {"name": "float_t", "expression": "f l o a t"},
+        {"name": "string_t", "expression": "s t r i n g"}
+    ],
+    "tokens": [
+        {"name": "type", "expression": "int_t|bool_t|float_t|string_t"},
+        {"name": "identifier", "expression": "$ letter (letter|digit)*"},
+        {"name": "attribution", "expression": "="},
+        {"name": "comparison_operator", "expression": ">|(> =)|<|(< =)|(= =)|(! =)"},
+        {"name": "arithimetic_operator", "expression": "+|-"},
+        {"name": "left_curly", "expression": "{"},
+        {"name": "right_curly", "expression": "}"},
+        {"name": "boolean", "expression": "(t r u e)|(f a l s e)"},
+        {"name": "integer", "expression": "digit digit*"},
+        {"name": "float", "expression": "(digit)* . digit digit*"}
+    ]
+}

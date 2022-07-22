@@ -40,7 +40,7 @@ class Lexer:
             if self.current_char in WHITESPACE:
                 self.forward()
                 yield Token(TokenType.CONCATENATION)
-            elif self.current_char == "+":
+            elif self.current_char == "⁺":
                 self.forward()
                 yield Token(TokenType.POSITIVE_CLOSURE)
             elif self.current_char == "*":

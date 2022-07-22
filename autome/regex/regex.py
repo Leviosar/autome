@@ -1,3 +1,4 @@
+from autome.finite_automata.machine import NonDeterministicFiniteAutomata
 from autome.regex import Lexer, Parser, Interpreter
 
 
@@ -12,3 +13,6 @@ class Regex:
 
     def match(self, test) -> bool:
         return self.interpreter.run(self.tree).determinize().accepts(test)
+
+    def automata(self) -> NonDeterministicFiniteAutomata:
+        return self.interpreter.run(self.tree)

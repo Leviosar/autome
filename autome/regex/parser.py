@@ -1,3 +1,4 @@
+from typing import List
 from autome.regex import Token, TokenType
 
 from autome.regex.nodes import (
@@ -11,9 +12,19 @@ from autome.regex.nodes import (
 
 
 class Parser:
-    def __init__(self, tokens):
+    def __init__(self, tokens: List[Token]):
         self.tokens = iter(tokens)
         self.forward()
+
+    def throw(self) -> None:
+        problem = self.current_token
+        rest = []
+
+        while self.current_token is not None:
+            self.forward()
+            rest.append(self.current_token)
+
+        raise Exception(f"Unexpected token {problem} in {rest}")
 
     def forward(self) -> None:
         try:
@@ -28,7 +39,7 @@ class Parser:
         result = self.expression()
 
         if self.current_token != None:
-            raise Exception("Unexpected token")
+            self.throw()
 
         return result
 

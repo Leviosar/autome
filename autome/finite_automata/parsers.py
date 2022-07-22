@@ -105,9 +105,9 @@ class JSONConverter:
 
         with open(source, "r", encoding="utf8") as file:
             model = json.loads(file.read())
-            states = [State.parse(state) for state in model["states"]]
+            states = [State.from_json(state) for state in model["states"]]
             transitions = [
-                Transition.parse(transition, states)
+                Transition.from_json(transition, states)
                 for transition in model["transitions"]
             ]
 
@@ -117,3 +117,16 @@ class JSONConverter:
             return NonDeterministicFiniteAutomata(
                 states=states, transitions=transitions
             )
+
+    @classmethod
+    def save(
+        cls, source: Union[DeterministicFiniteAutomata, NonDeterministicFiniteAutomata], output: Path
+    ):
+        model = {}
+        model['states'] = [state.to_json() for state in source.states]
+        model['transitions'] = [transition.to_json() for transition in source.transitions]
+
+        with open(output, 'w+') as fp:
+            fp.write(json.dumps(model))
+        
+        print(f"Automato salvo em {output}")
