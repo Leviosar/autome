@@ -332,7 +332,7 @@ class DeterministicFiniteAutomata(BaseMachine):
         return self.complement()
 
     def __repr__(self):
-        soymbols = list(set(map(lambda transition: transition.symbol, self.transitions)))
+        symbols = list(set(map(lambda transition: transition.symbol, self.transitions)))
         symbols.sort()
 
         headers = ["state"] + list(symbols)
@@ -466,9 +466,6 @@ class NonDeterministicFiniteAutomata(DeterministicFiniteAutomata):
                 # Se o novo estado criado não estiver na pilha, nem nos estados atuais, adiciona na pilha
                 if not (new_state in new.states) and not (new_state in state_stack):
                     state_stack.append(closure)
-                else:
-                    print(new_state)
-                    print("ja tava")
 
                 # Adiciona uma transição do estado fecho para o novo estado, pelo símbolo
                 new.add_transition(closure_state, new_state, symbol)

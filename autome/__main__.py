@@ -11,8 +11,7 @@ from autome.interface import Lexico
 def lexico(input: Path, source: Path, output: Path):
     match input.suffixes:
         case ['.automata', '.json']:
-            automata = JSONConverter.parse(input)
-            lexer = Lexico(automata)
+            lexer = Lexico.parse(input)
         case ['.lexer', '.json']:
             lexer = Lexico(input)
         case other:
@@ -22,8 +21,7 @@ def lexico(input: Path, source: Path, output: Path):
     lexer.run(source)
     
     if output is not None:
-        converter = JSONConverter()
-        converter.save(lexer.lexer, output)
+        lexer.save(output)
 
 if __name__ == '__main__':
     lexico()

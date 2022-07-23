@@ -1,0 +1,74 @@
+{
+    "reserved-keywords": [
+        "const"
+    ],
+    "definitions": [
+        {
+            "name": "digit",
+            "expression": "0|1"
+        }
+    ],
+    "tokens": [
+        {
+            "name": "boolean",
+            "expression": "(0|1)*"
+        }
+    ],
+    "automata": {
+        "states": [
+            {
+                "name": "q52",
+                "initial": false,
+                "accept": true,
+                "uid": "39bfee4e-47cd-4ae1-a016-666afdbc521b",
+                "type": "boolean"
+            },
+            {
+                "name": "q53",
+                "initial": false,
+                "accept": true,
+                "uid": "46570a97-75f4-4d42-9967-bbef6bf165aa",
+                "type": "boolean"
+            },
+            {
+                "name": "q54",
+                "initial": true,
+                "accept": true,
+                "uid": "9b0ea02b-db95-4364-9be1-ad601a63536a",
+                "type": "boolean"
+            }
+        ],
+        "transitions": [
+            {
+                "origin": "9b0ea02b-db95-4364-9be1-ad601a63536a",
+                "destiny": "39bfee4e-47cd-4ae1-a016-666afdbc521b",
+                "symbol": "1"
+            },
+            {
+                "origin": "9b0ea02b-db95-4364-9be1-ad601a63536a",
+                "destiny": "46570a97-75f4-4d42-9967-bbef6bf165aa",
+                "symbol": "0"
+            },
+            {
+                "origin": "39bfee4e-47cd-4ae1-a016-666afdbc521b",
+                "destiny": "39bfee4e-47cd-4ae1-a016-666afdbc521b",
+                "symbol": "1"
+            },
+            {
+                "origin": "46570a97-75f4-4d42-9967-bbef6bf165aa",
+                "destiny": "39bfee4e-47cd-4ae1-a016-666afdbc521b",
+                "symbol": "1"
+            },
+            {
+                "origin": "39bfee4e-47cd-4ae1-a016-666afdbc521b",
+                "destiny": "46570a97-75f4-4d42-9967-bbef6bf165aa",
+                "symbol": "0"
+            },
+            {
+                "origin": "46570a97-75f4-4d42-9967-bbef6bf165aa",
+                "destiny": "46570a97-75f4-4d42-9967-bbef6bf165aa",
+                "symbol": "0"
+            }
+        ]
+    }
+}

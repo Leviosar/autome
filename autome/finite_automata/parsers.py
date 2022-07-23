@@ -9,7 +9,7 @@ from autome.finite_automata import (
 )
 from pathlib import Path
 from xml.etree import ElementTree as ET
-from typing import Callable, List, Union
+from typing import Callable, Dict, List, Union
 
 
 class JFlapConverter:
@@ -94,7 +94,7 @@ class JFlapConverter:
 class JSONConverter:
     @classmethod
     def parse(
-        cls, source: Path, deterministic=True
+        cls, source: Union[Path, Dict], deterministic=True
     ) -> Union[NonDeterministicFiniteAutomata, DeterministicFiniteAutomata]:
         """
         Creates an instance of Machine parsed from a json file located at @path that follows the schematics provided by the project (see /machines folder)
@@ -103,28 +103,40 @@ class JSONConverter:
         Throws ValueError if the json file doesn't match the schematics
         """
 
-        with open(source, "r", encoding="utf8") as file:
-            model = json.loads(file.read())
-            states = [State.from_json(state) for state in model["states"]]
-            transitions = [
-                Transition.from_json(transition, states)
-                for transition in model["transitions"]
-            ]
-
+        if isinstance(source, Dict):
+            model = source
+        elif isinstance(source, Path):
+            with open(source, "r", encoding="utf8") as file:
+                model = json.loads(file.read())
+                
+        states = [State.from_json(state) for state in model["states"]]
+        transitions = [
+            Transition.from_json(transition, states)
+            for transition in model["transitions"]
+        ]
+        
         if deterministic:
             return DeterministicFiniteAutomata(states=states, transitions=transitions)
         else:
             return NonDeterministicFiniteAutomata(
                 states=states, transitions=transitions
             )
+            
+    @classmethod
+    def serialize(
+        cls, source: Union[DeterministicFiniteAutomata, NonDeterministicFiniteAutomata]
+    ) -> Dict:
+        model = {}
+        model['states'] = [state.to_json() for state in source.states]
+        model['transitions'] = [transition.to_json() for transition in source.transitions]
+        
+        return model
 
     @classmethod
     def save(
         cls, source: Union[DeterministicFiniteAutomata, NonDeterministicFiniteAutomata], output: Path
     ):
-        model = {}
-        model['states'] = [state.to_json() for state in source.states]
-        model['transitions'] = [transition.to_json() for transition in source.transitions]
+        model = cls.serialize(source)
 
         with open(output, 'w+') as fp:
             fp.write(json.dumps(model))

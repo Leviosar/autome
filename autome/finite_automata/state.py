@@ -2,6 +2,7 @@ from os import stat
 from typing import Dict, List
 from itertools import count
 from time import time
+from uuid import uuid4
 
 class State:
     _ids = count(0)
@@ -20,7 +21,7 @@ class State:
         if uid is not None:
             self.uid = uid
         else:
-            self.uid = time()
+            self.uid = str(uuid4())
 
         if name is None:
             self.name = f"q{self.id}"
@@ -53,7 +54,8 @@ class State:
         return State(
             initial=model.get("initial"),
             accept=model.get("accept"),
-            uid=model.get("uid")
+            uid=model.get("uid"),
+            type=model.get("type"),
         )
 
     @classmethod

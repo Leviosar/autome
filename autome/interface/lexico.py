@@ -1,10 +1,13 @@
+from ast import keyword, parse
 from dataclasses import dataclass
 from email import header
 import json
 from operator import le
+import pathlib
 from typing import Dict, List, Optional, Union
 import click
 from autome.finite_automata.machine import DeterministicFiniteAutomata
+from autome.finite_automata.parsers import JSONConverter
 from autome.finite_automata.state import State
 from autome.regex import Regex, lexer
 from autome.regex.blocks import UnionAutomata
@@ -18,6 +21,9 @@ class Definition:
 
     def __repr__(self):
         return f"{self.name} => {self.expression}"
+    
+    def dict(self):
+        return {"name": self.name, "expression": self.expression}
 
 @dataclass
 class Token:
@@ -57,14 +63,30 @@ class Lexico:
     The machine actually evaluating the code.
     """
 
-    def __init__(self, input: Union[click.Path, DeterministicFiniteAutomata]) -> None:
-        if type(input) == click.Path:
+    def __init__(self, input: Union[click.Path, pathlib.Path, None]) -> None:
+        if input is None:
+            pass
+        elif isinstance(input, click.Path) or isinstance(input, pathlib.Path):
             self.input = self.parse_input(input)
             self.lexer = self.build_lexer()
-        elif type(input) == DeterministicFiniteAutomata:
-            self.lexer = input 
         else:
-            raise "Invalid arguments"
+            print(type(input))
+            raise Exception("Invalid arguments")
+        
+    @classmethod
+    def parse(cls, input: Union[click.Path, pathlib.Path]):
+        """Parses the input file with the definitions of a lexical analyzer into useful data for the program
+        """
+        with open(input) as file:
+            content = json.load(file)
+        
+        instance = Lexico(None)
+        instance.keywords = content["reserved-keywords"]
+        instance.definitions = [ Definition(definition["name"], definition["expression"]) for definition in content["definitions"]]
+        instance.tokens = [ Definition(definition["name"], definition["expression"]) for definition in content["tokens"]]
+        instance.lexer = JSONConverter.parse(content["automata"])
+        
+        return instance
 
     def parse_input(self, input: click.Path):
         """Parses the input file with the definitions of a lexical analyzer into useful data for the program
@@ -75,6 +97,21 @@ class Lexico:
         self.keywords = content["reserved-keywords"]
         self.definitions = [ Definition(definition["name"], definition["expression"]) for definition in content["definitions"]]
         self.tokens = [ Definition(definition["name"], definition["expression"]) for definition in content["tokens"]]
+    
+    def save(self, output: click.Path) -> None:
+        converter = JSONConverter()
+        
+        model = converter.serialize(self.lexer)
+        
+        data = {
+            'reserved-keywords': self.keywords,
+            'definitions': [definition.dict() for definition in self.definitions],
+            'tokens': [token.dict() for token in self.tokens],
+            'automata': model,
+        }
+        
+        with open(output, 'w+') as fp:
+            fp.write(json.dumps(data))
 
     def build_lexer(self) -> DeterministicFiniteAutomata:
         """
@@ -125,6 +162,8 @@ class Lexico:
         If at any time there's a symbol the DFA can't recognize, or a invalid token pattern, raises an
         exception. Otherwise, returns a list of the recognized tokens.
         """
+        self.lexer.create_transition_map()
+        print(self.lexer)
 
         with open(code) as source_file:
             source = source_file.read()

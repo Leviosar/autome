@@ -1,0 +1,10 @@
+{
+    "version": "1.0.0",
+    "reserved-keywords": ["const"],
+    "definitions": [
+        {"name": "digit", "expression": "0|1"}
+    ],
+    "tokens": [
+        {"name": "boolean", "expression": "(0|1)*"}
+    ]
+}
