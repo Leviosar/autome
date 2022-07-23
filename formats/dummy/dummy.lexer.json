@@ -5,17 +5,17 @@
         {"name": "digit", "expression": "0|1"}
     ],
     "tokens": [
-        {"name": "boolean", "expression": "(0|1)*"},
+        {"name": "binary", "expression": "(0|1)*"},
         {"name": "operator", "expression": "a n d|o r"}
     ],
     "grammar": {
         "nonterminals": ["S", "A", "B"],
-        "terminals": ["a", "b"],
+        "terminals": ["0", "1", "a", "o", "&"],
         "initial": "S",
         "productions": [
-            {"head": "S", "body": "A B|a"},
-            {"head": "A", "body": "a A B|a"},
-            {"head": "B", "body": "A B|a"}
+            {"head": "S", "body": "0 S|1 S|0 A|1 A"},
+            {"head": "A", "body": "a B|o B"},
+            {"head": "B", "body": "0 B|1 B|0|1"}
         ]
     }
 }

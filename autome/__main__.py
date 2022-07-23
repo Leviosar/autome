@@ -31,8 +31,12 @@ def lexico(input: Path, source: Path, output: Path):
 @cli.command()
 @click.argument("input")
 def sin(input: Path):
-    # cfg = CFG.parse(input)
     cfg = CFG.parse(input)
+    print(cfg)
+    print(cfg.calculateFirst())
+    print(cfg.calculateFollow())
+    print(cfg.left_factoring())
+    print(cfg.accept("0101a0101".strip(), True))
 
 if __name__ == '__main__':
     cli()

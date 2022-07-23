@@ -1,6 +1,7 @@
 from fileinput import filename
 import json
 from math import prod
+from pprint import pprint
 from typing import List
 from tabulate import tabulate
 import click
@@ -33,7 +34,7 @@ class CFG:
         return tabulate(content, headers=["Grammar"], tablefmt="fancy_grid")
     
     @classmethod
-    def parse_(cls, input: click.Path):
+    def parse(cls, input: click.Path):
         with open(input, 'r') as file:
             content = json.load(file)
             
@@ -191,3 +192,195 @@ class CFG:
         # self.eliminateEpsilonProductions()
 
         return self
+    
+    def left_factoring(self, *, iters=10):
+        """Fatoração de GLC"""
+        self.remove_direct_non_determinism()
+        
+        for _ in range(iters):
+            changed = self.remove_indirect_non_determinism()
+            
+            self.remove_direct_non_determinism()
+            
+            if not changed:
+                break
+        else:
+            return False
+        
+        return True
+
+    def remove_direct_non_determinism(self):
+        """Remoção de não determinismo direto"""
+        productions = self.productions
+        new = {}
+        
+        for nonterminal in productions:
+            new[nonterminal] = []
+            prefixes = []
+            
+            for first in productions[nonterminal]:
+                if not prefixes:
+                    prefixes.append(first)
+                    continue
+                
+                prefix_found = False
+                prefix = []
+                
+                for i, second in enumerate(prefixes):
+                    for p1, p2 in zip(first, second):
+                        if p1 != p2:
+                            break
+                        prefix.append(p1)
+                    if prefix and not prefix_found:
+                        prefixes[i] = prefix
+                        prefix_found = True
+                if not prefix_found:
+                    prefixes.append(first)
+            
+            count = 1
+            for pref in prefixes:
+                aux = []
+                for prod in productions[nonterminal]:
+                    if len(pref) <= len(prod) and pref == prod[:len(pref)]:
+                        aux.append(prod)
+                if len(aux) > 1:
+                    symbol = f"{nonterminal}" + ("'" * count)
+                    count += 1
+                    self.nonterminals.append(symbol)
+                    new_prod = pref + [symbol]
+                    
+                    if new_prod not in new[nonterminal]:
+                        new[nonterminal].append(new_prod)
+                    
+                    new[symbol] = []
+
+                    for p in aux:
+                        p = p[len(pref):]
+                        p = p if len(p) > 0 else ['&']
+                        new[symbol].append(p)
+                else:
+                    new[nonterminal].append(pref)
+        self.productions = new
+
+    def remove_indirect_non_determinism(self):
+        """ Identifica e remove os indeterminismos indiretos utilizando os conjuntos FIRST"""
+
+        def get_firsts_chain(chain):
+            """Helper para atualizar e buscar o first do primeiro simbolo da cadeia"""
+            self.calculateFirst()
+
+            if (chain[0] == '&'):
+                return []
+
+            return list(self.first[chain[0]])
+
+        changed = False
+
+        for symbol in self.productions:
+            aux = []
+            worrisome = set()
+
+            for prod in self.productions[symbol]:
+                firsts = get_firsts_chain(prod)
+
+                for a in aux:
+                    if len(set(firsts).intersection(a[1])) > 0:
+                        worrisome.add(tuple(prod))
+                        worrisome.add(tuple(a[0]))
+                        changed = True
+
+                for i, symbol in enumerate(prod[:-1]):
+                    if symbol in self.nonterminals and '&' in self.first[symbol]:
+                        if len(self.first[symbol].intersection(get_firsts_chain(prod[i + 1:]))) > 0:
+                            worrisome.add(prod)
+                            changed = True
+
+                aux.append((prod, firsts))
+            
+            for prod in worrisome:
+                self.productions[symbol].remove(list(prod))
+
+            for prod in worrisome:
+                derivations = self.derive(list(prod))
+                for d in derivations:
+                    if d not in self.productions[symbol]:
+                        self.productions[symbol].append(d)
+        return changed
+
+    def table(self):
+        """Gera tabela de parse LL(1)"""
+        self.calculateFirst()
+        self.calculateFollow()
+
+        table = {}
+
+        for nonterminal, productions in self.productions.items():
+            table[nonterminal] = {}
+
+            for alpha in productions:
+                if alpha[0] == '&':
+                    # Adicionar follow da cabeça para transições epsilon
+                    firsts = ['&']
+                else:
+                    # Verificar se a produção pode ser anulável
+                    firsts = self.first[alpha[0]]
+
+                for symbol in firsts:
+                    if symbol in self.terminals:
+                        if symbol == "&":
+                            table[nonterminal]["$"] = alpha
+                        else:
+                            table[nonterminal][symbol] = alpha
+                
+                if '&' in firsts:
+                    for symbol in self.follow[nonterminal]:
+                        if symbol in self.terminals:
+                            if symbol == "&":
+                                table[nonterminal]["$"] = alpha
+                            else:
+                                table[nonterminal][symbol] = alpha
+        return table
+    
+    def accept(self, sentence, show_steps=False):
+        """Reconhece sentença via implementação de um analisador LL(1)"""
+        table = self.table()
+        pprint(table)
+        if show_steps:
+            print(f"\nMostrando passos para o reconhecimento da sentença {' '.join(sentence)} com a gramática:")
+            print(self)
+            print('Conjuntos FIRST')
+            for symbol, firsts in self.first.items():
+                print(f'FIRST({symbol}) = {firsts}')
+
+            print('Conjuntos FOLLOW')
+            for symbol, follow in self.follow.items():
+                print(f'FOLLOW({symbol}) = {follow}')
+
+        stack = ["$", self.initial]
+        sentence += '$'  # adiciona fim da leitura
+        i = 0
+        symbol = sentence[i]
+        while stack != ['$'] and i < len(sentence):
+            if show_steps:
+                print(f'Cabeçote: {symbol}; Pilha: {stack}')
+            if stack[-1] in self.terminals:
+                if i + 1 < len(sentence):
+                    i += 1
+                symbol = sentence[i]
+                stack.pop()
+                continue
+            if symbol not in table[stack[-1]]:
+                print('cy')
+                break
+            prod = table[stack[-1]][symbol]
+            stack.pop()
+            if prod == ["&"]:
+                continue
+            elif prod:
+                for p in reversed(prod):
+                    stack.append(p)
+        output = 'aceita' if stack == ["$"] else 'rejeita'
+        if show_steps:
+            print(f'Cabeçote: {symbol}; Pilha: {stack}')
+            print(f'\n{output} sentença')
+        return stack == ["$"]
