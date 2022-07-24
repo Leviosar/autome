@@ -1,4 +1,4 @@
-from autome.utils import Direction
+from autome.utils.enums import Direction
 from autome.turing_machine.state import State
 from typing import Callable, List
 

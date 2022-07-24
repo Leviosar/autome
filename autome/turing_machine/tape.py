@@ -1,5 +1,5 @@
 import json
-from autome.utils import Direction
+from autome.utils.enums import Direction
 
 
 class Tape:

@@ -1,42 +1,17 @@
-from ast import keyword, parse
-from dataclasses import dataclass
-from email import header
 import json
-from operator import le
 import pathlib
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 import click
 from autome.finite_automata.machine import DeterministicFiniteAutomata
 from autome.finite_automata.parsers import JSONConverter
-from autome.finite_automata.state import State
-from autome.regex import Regex, lexer
+from autome.regex import Regex
 from autome.regex.blocks import UnionAutomata
 from tabulate import tabulate
 
-
-@dataclass
-class Definition:
-    name: str
-    expression: str
-    regex: Optional[Regex] = None
-
-    def __repr__(self):
-        return f"{self.name} => {self.expression}"
-
-    def dict(self):
-        return {"name": self.name, "expression": self.expression}
+from autome.utils.dataclasses import Definition, Token
 
 
-@dataclass
-class Token:
-    type: str
-    value: str
-
-    def __repr__(self) -> str:
-        return f"{self.type}:{self.value}"
-
-
-class Lexico:
+class Lexer:
     """
     Interface for generating lexical analyzers using Thompson's building algorithm
     """
@@ -73,7 +48,6 @@ class Lexico:
             self.input = self.parse_input(input)
             self.lexer = self.build_lexer()
         else:
-            print(type(input))
             raise Exception("Invalid arguments")
 
     @classmethod
@@ -82,7 +56,10 @@ class Lexico:
         with open(input) as file:
             content = json.load(file)
 
-        instance = Lexico(None)
+        if not content.get('automata'):
+            return Lexer(input)
+
+        instance = Lexer(None)
         instance.keywords = content["reserved-keywords"]
         instance.definitions = [
             Definition(definition["name"], definition["expression"])
@@ -136,7 +113,7 @@ class Lexico:
         data = self.definitions + self.tokens
         data = [[entry.name, entry.expression] for entry in data]
 
-        headers = ["Nome", "Expressão"]
+        headers = ["Type", "Expression"]
         print(tabulate(data, headers=headers, tablefmt="fancy_grid"))
 
         defined_tokens: List[Definition] = []
@@ -172,7 +149,7 @@ class Lexico:
         print("Espera um pouquinho que eu sou meio devagar...")
         return machine.determinize().clone().minimize()
 
-    def run(self, code: click.Path) -> List[Dict[str, str]]:
+    def run(self, code: str) -> List[Dict[str, str]]:
         """
         Evaluates a given source code with a previously built lexer.
 
@@ -180,12 +157,8 @@ class Lexico:
         exception. Otherwise, returns a list of the recognized tokens.
         """
         self.lexer.create_transition_map()
-        print(self.lexer)
 
-        with open(code) as source_file:
-            source = source_file.read()
-
-        source = source.strip()
+        source = code.strip()
 
         data = []
         lines = source.split("\n")
@@ -223,5 +196,4 @@ class Lexico:
             data.append([entry.type, entry.value])
         print(tabulate(data, headers=["TokenType", "Value"], tablefmt="fancy_grid"))
 
-        print(found)
         return found

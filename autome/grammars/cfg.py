@@ -3,7 +3,8 @@ import click
 
 from typing import List
 
-from autome.interface.sintaxo import display_analysis_table
+from autome.utils.dataclasses import Token
+from autome.utils.errors import SyntaxException
 
 
 class CFG:
@@ -383,7 +384,7 @@ class CFG:
 
         return table
 
-    def accept(self, sentence, debug=False):
+    def accept(self, tokens: List[Token], debug=False):
         """Reconhece sentença via implementação de um analisador LL(1)"""
         self.calculate_first()
         self.calculate_follow()
@@ -392,10 +393,9 @@ class CFG:
 
         table = self.table()
 
-        display_analysis_table(self, table)
-
         stack = ["$", self.initial]
 
+        sentence = " ".join([token.type for token in tokens])
         sentence = sentence.split(" ")
         sentence.append("$")
         i = 0
@@ -415,7 +415,10 @@ class CFG:
                 continue
 
             if symbol not in table[stack[-1]]:
-                break
+                if symbol == "$":
+                    raise SyntaxException(f"Unexpected EOL: {sentence[i - 1]}")
+                else:
+                    raise SyntaxException(f"Unexpected symbol: {symbol}")
 
             prod = table[stack[-1]][symbol]
             stack.pop()
