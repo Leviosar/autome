@@ -1,10 +1,7 @@
 import json
 import click
 
-from fileinput import filename
-from pprint import pprint
 from typing import List
-from tabulate import tabulate
 
 from autome.interface.sintaxo import display_analysis_table
 
