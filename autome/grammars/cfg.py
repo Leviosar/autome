@@ -6,12 +6,6 @@ from typing import List
 from autome.interface.sintaxo import display_analysis_table
 
 
-class Symbol:
-    def __init__(self, name: str, terminal: bool):
-        self.name = name
-        self.terminal = terminal
-
-
 class CFG:
     def __init__(
         self,
@@ -300,43 +294,9 @@ class CFG:
                     new[nonterminal].append(pref)
         self.productions = new
 
-    def mine_remove(self):
-        def get_firsts_chain(chain):
-            """Helper para atualizar e buscar o first do primeiro simbolo da cadeia"""
-            self.calculate_first()
-
-            if chain[0] == "&":
-                return []
-            # print(self.first)
-            r = self.first[chain[0]]
-            # print(r)
-
-            return r
-
-        for head, productions in self.productions.items():
-            firsts = []
-            print(f"CABEÇA: {head}")
-            print(self)
-            for i, production in enumerate(productions):
-                firsts.append(get_firsts_chain(production))
-
-            intersections = set()
-
-            for i in range(len(firsts)):
-                for j in range(len(firsts)):
-                    # Not intersection the set with itself
-                    if i == j:
-                        continue
-
-                    intersections.union(firsts[i].intersection(firsts[j]))
-            print(firsts)
-            print(intersections)
-
     def remove_indirect_non_determinism(self):
         """Identifica e remove os indeterminismos indiretos utilizando os conjuntos FIRST"""
-        # self.mine_remove()
 
-        # 2 / 0
         def get_firsts_chain(chain):
             """Helper para atualizar e buscar o first do primeiro simbolo da cadeia"""
             self.calculate_first()
@@ -371,7 +331,10 @@ class CFG:
                             )
                             > 0
                         ):
-                            worrisome.add(prod)
+                            try:
+                                worrisome.add(prod)
+                            except TypeError:
+                                print(f"Opsie {prod}")
                             changed = True
 
                 aux.append((prod, firsts))
@@ -420,16 +383,7 @@ class CFG:
 
         return table
 
-    def print_firsts_follows(self):
-        print("Conjuntos FIRST")
-        for symbol, firsts in self.first.items():
-            print(f"FIRST({symbol}) = {firsts}")
-
-        print("Conjuntos FOLLOW")
-        for symbol, follow in self.follow.items():
-            print(f"FOLLOW({symbol}) = {follow}")
-
-    def accept(self, sentence, show_steps=False):
+    def accept(self, sentence, debug=False):
         """Reconhece sentença via implementação de um analisador LL(1)"""
         self.calculate_first()
         self.calculate_follow()
@@ -440,27 +394,16 @@ class CFG:
 
         display_analysis_table(self, table)
 
-        if show_steps:
-            print(
-                f"\nMostrando passos para o reconhecimento da sentença {' '.join(sentence)} com a gramática:"
-            )
-            print(self)
-
-            self.print_firsts_follows()
-
         stack = ["$", self.initial]
 
         sentence = sentence.split(" ")
-        sentence.append("$")  # adiciona fim da leitura
+        sentence.append("$")
         i = 0
         symbol = sentence[i]
 
-        print("Senteça")
-        print(sentence)
-
         while stack != ["$"] and i < len(sentence):
-            if show_steps:
-                print(f"Cabeçote: {symbol}; Pilha: {stack}")
+            if debug:
+                print(f"Input: {symbol}; Stack: {stack}")
 
             if stack[-1] in self.terminals:
                 if i + 1 < len(sentence):
@@ -485,10 +428,7 @@ class CFG:
 
         accepted = stack == ["$"] and sentence[i] == "$"
 
-        if show_steps:
-            output = "aceita" if accepted else "rejeita"
-
-            print(f"Cabeçote: {symbol}; Pilha: {stack}")
-            print(f"\n{output} sentença")
+        if debug:
+            print(f"Input: {symbol}; Stack: {stack}")
 
         return accepted
