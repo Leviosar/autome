@@ -1,10 +1,12 @@
-from fileinput import filename
 import json
-from math import prod
+import click
+
+from fileinput import filename
 from pprint import pprint
 from typing import List
 from tabulate import tabulate
-import click
+
+from autome.interface.sintaxo import display_analysis_table
 
 
 class Symbol:
@@ -57,7 +59,7 @@ class CFG:
             
         return CFG(nonterminals, terminals, initial, productions)
     
-    def calculateFirst(self):
+    def calculate_first(self):
         """Calcula o conjunto first da gramática"""
         self.first.clear()
 
@@ -68,7 +70,7 @@ class CFG:
         # Para cada não terminal X
         for nonterminal in self.nonterminals:
             self.first[nonterminal] = set()
-            
+
             # Se X ::= aY, a pertence à First(X) = First(X) ∪ {a}
             for production in self.productions[nonterminal]:
                 if production[0] in self.terminals:
@@ -98,52 +100,68 @@ class CFG:
                         
         return self.first
 
-    def calculateFollow(self):
+    def first_of_sequence(self, sequence):
+        firsts = set()
+
+        for index, symbol in enumerate(sequence):
+            firsts = firsts.union(self.first[symbol]) - {'&'}
+
+            # Se o first não tem  epsilon, não precisamos continuar pensando se será ou não anulável
+            if '&' not in self.first[symbol]:
+                break
+
+            # Se chegou no último símbolo da produção, e esse símbolo é anulável, então precisamos adicionar o follow também
+            if index == len(sequence) - 1:
+                firsts.add("&")
+
+        return firsts
+
+    def calculate_follow(self):
         """Calcula o conjunto follow dos não-terminais da gramática"""
         self.follow.clear()
         
-        self.calculateFirst()
+        self.calculate_first()
 
-        for nonterminal in self.nonterminals:
-            self.follow[nonterminal] = set()
-            if nonterminal == self.initial:
-                self.follow[nonterminal].add("$")
+        follows = {symbol: set() for symbol in self.nonterminals}
 
-        stop = False
-        while not stop:
-            stop = True
-            for nonterminal in self.nonterminals:
-                for production in self.productions[nonterminal]:
-                    # 1. Se A ::= ɑBβ e β != ɛ, então Follow(B) = Follow(B) ∪ First(β) 
-                    for i, symbol in enumerate(production[:-1]):
-                        if symbol in self.nonterminals: # Somente não-terminais possuem FOLLOW
-                            for j in range(i + 1, len(production)):  # Verifica símbolos seguintes
-                                firstOfCurrentProduction = self.first[production[j]].copy()
-                                if '&' in firstOfCurrentProduction:
-                                    firstOfCurrentProduction.remove('&')
-                                if not firstOfCurrentProduction.issubset(self.follow[symbol]):
-                                    self.follow[symbol] = self.follow[symbol].union(firstOfCurrentProduction)
-                                    stop = False
-                                # Se & pertence ao First do símbolo atual nonTerminalProduction[j] continua, senão, para
-                                if "&" not in self.first[production[j]]:
-                                    break
-                                
-                    # 2. Se A ::= ɑB (ou A ::= ɑBβ, onde & pertence à First(β)), então Follow(A) |= Follow(B)
-                    for i, symbol in enumerate(production[::-1]): # Varre produção ao contrário
-                        if symbol not in self.nonterminals:
-                            break
+        follows[self.initial].add('$')
 
-                        if not self.follow[nonterminal].issubset(self.follow[symbol]):
-                            self.follow[symbol] = self.follow[symbol].union(self.follow[nonterminal])
-                            stop = False
+        changed = True
 
-                        # Se & pertence ao FIRST do símbolo atual nonTerminalProduction[j], continua, senão, para
-                        if "&" not in self.first[production[i]]:
-                            break
+        while changed:
+            changed = False
+
+            for head, productions in self.productions.items():
+                for production in productions:
+                    for i, symbol in enumerate(production):
+                        if symbol in self.terminals:
+                            continue
+
+                        sequence = production[i + 1:]
+
+                        # This means that this nonterminal is the last in the production
+                        if len(sequence) == 0:
+                            follows[symbol] = follows[symbol].union(follows[head])
+
+                            continue
+
+                        firsts = self.first_of_sequence(sequence)
+
+                        old_follow = follows[symbol].copy()
+
+                        follows[symbol] = follows[symbol].union(firsts - {'&'})
+
+                        if '&' in firsts:
+                            follows[symbol] = follows[symbol].union(follows[head])
+
+                        if old_follow != follows[symbol]:
+                            changed = True
+
+        self.follow = follows
 
         return self.follow
-    
-    def eliminateDirectLeftRecursion(self, symbol):
+
+    def eliminate_direct_left_recursion(self, symbol):
         alphas = list()
         betas = list()
         newSymbol = f"{symbol}\'"
@@ -167,16 +185,16 @@ class CFG:
             self.productions[symbol] = betas
             
     
-    def eliminateLeftRecursion(self):
+    def eliminate_left_recursion(self):
         """Retorna uma gramática equivalente, eliminando recursão a esquerda"""
 
         for symbol in self.nonterminals:
-            self.eliminateDirectLeftRecursion(symbol)
+            self.eliminate_direct_left_recursion(symbol)
 
         # elimina &-producoes
         # self.eliminateEpsilonProductions()
         
-        nonterminals = enumerate(self.N)
+        nonterminals = enumerate(self.nonterminals)
         for (i, nonTerminali) in nonterminals:
             for nonTerminalj in [nonTerminalj for j, nonTermninalj in nonterminals if j < i]:
                 for production in self.productions[nonTerminali]:
@@ -186,7 +204,7 @@ class CFG:
                             productionBeta = productionBeta.copy()
                             productionBeta.append(production[1:].copy())
                             self.productions[nonTerminali].append(productionBeta)
-            self.eliminateDirectLeftRecursion(nonTerminali)
+            self.eliminate_direct_left_recursion(nonTerminali)
 
         # elimina &-producoes
         # self.eliminateEpsilonProductions()
@@ -196,7 +214,7 @@ class CFG:
     def left_factoring(self, *, iters=10):
         """Fatoração de GLC"""
         self.remove_direct_non_determinism()
-        
+
         for _ in range(iters):
             changed = self.remove_indirect_non_determinism()
             
@@ -209,20 +227,40 @@ class CFG:
         
         return True
 
+    def derive(self, prod):
+        """Gera lista de cadeias derivadas da produção"""
+        if not prod:
+            return [[]]
+        prod_ = prod[0]
+        if prod_ in self.terminals:
+            return [[prod_] + derivation for derivation in self.derive(prod[1:])]
+        elif prod_ in self.productions:
+            out = []
+            derivations = self.derive(prod[1:])
+            for p in self.productions[prod_]:
+                if p == ['&']:
+                    out += derivations
+                else:
+                    if derivations:
+                        out += [p + deriv for deriv in derivations]
+                    else:
+                        out += p
+            return out
+
     def remove_direct_non_determinism(self):
         """Remoção de não determinismo direto"""
         productions = self.productions
         new = {}
-        
+
         for nonterminal in productions:
             new[nonterminal] = []
             prefixes = []
-            
+
             for first in productions[nonterminal]:
                 if not prefixes:
                     prefixes.append(first)
                     continue
-                
+
                 prefix_found = False
                 prefix = []
                 
@@ -262,15 +300,49 @@ class CFG:
                     new[nonterminal].append(pref)
         self.productions = new
 
-    def remove_indirect_non_determinism(self):
-        """ Identifica e remove os indeterminismos indiretos utilizando os conjuntos FIRST"""
-
+    def mine_remove(self):
         def get_firsts_chain(chain):
             """Helper para atualizar e buscar o first do primeiro simbolo da cadeia"""
-            self.calculateFirst()
+            self.calculate_first()
 
             if (chain[0] == '&'):
                 return []
+            # print(self.first)
+            r = self.first[chain[0]]
+            # print(r)
+
+            return r
+
+        for head, productions in self.productions.items():
+            firsts = []
+            print(f'CABEÇA: {head}')
+            print(self)
+            for i, production in enumerate(productions):
+                firsts.append(get_firsts_chain(production))
+
+            intersections = set()
+
+            for i in range(len(firsts)):
+                for j in range(len(firsts)):
+                    # Not intersection the set with itself
+                    if i == j:
+                        continue
+
+                    intersections.union(firsts[i].intersection(firsts[j]))
+            print(firsts)
+            print(intersections)
+
+    def remove_indirect_non_determinism(self):
+        """ Identifica e remove os indeterminismos indiretos utilizando os conjuntos FIRST"""
+        # self.mine_remove()
+
+        # 2 / 0
+        def get_firsts_chain(chain):
+            """Helper para atualizar e buscar o first do primeiro simbolo da cadeia"""
+            self.calculate_first()
+
+            if (chain[0] == '&'):
+                return ['&']
 
             return list(self.first[chain[0]])
 
@@ -296,7 +368,7 @@ class CFG:
                             changed = True
 
                 aux.append((prod, firsts))
-            
+
             for prod in worrisome:
                 self.productions[symbol].remove(list(prod))
 
@@ -309,42 +381,48 @@ class CFG:
 
     def table(self):
         """Gera tabela de parse LL(1)"""
-        self.calculateFirst()
-        self.calculateFollow()
+        self.calculate_first()
+        self.calculate_follow()
 
         table = {}
 
-        for nonterminal, productions in self.productions.items():
-            table[nonterminal] = {}
+        for production_head, productions in self.productions.items():
+            table[production_head] = {}
 
             for alpha in productions:
+                firsts = set()
+
+                # Edge case for a production like B -> &
                 if alpha[0] == '&':
-                    # Adicionar follow da cabeça para transições epsilon
-                    firsts = ['&']
-                else:
-                    # Verificar se a produção pode ser anulável
-                    firsts = self.first[alpha[0]]
+                    firsts = firsts.union(self.follow[production_head])
+
+                # Verificar se a produção pode ser anulável
+                for symbol in alpha:
+                    firsts = firsts.union(self.first[symbol]) - {'&'}
+
+                    # Se o first não tem  epsilon, não precisamos continuar pensando se será ou não anulável
+                    if '&' not in self.first[symbol]:
+                        break
+
+                    # Se chegou no último símbolo da produção, e esse símbolo é anulável, então precisamos adicionar o follow também
+                    if symbol == alpha[-1]:
+                        firsts = firsts.union(self.follow[production_head])
 
                 for symbol in firsts:
-                    if symbol in self.terminals:
-                        if symbol == "&":
-                            table[nonterminal]["$"] = alpha
-                        else:
-                            table[nonterminal][symbol] = alpha
-                
-                if '&' in firsts:
-                    for symbol in self.follow[nonterminal]:
-                        if symbol in self.terminals:
-                            if symbol == "&":
-                                table[nonterminal]["$"] = alpha
-                            else:
-                                table[nonterminal][symbol] = alpha
+                    table[production_head][symbol] = alpha
+
         return table
     
     def accept(self, sentence, show_steps=False):
         """Reconhece sentença via implementação de um analisador LL(1)"""
+        self.calculate_first()
+        self.calculate_follow()
+        self.eliminate_left_recursion()
+        self.left_factoring()
         table = self.table()
-        pprint(table)
+
+        display_analysis_table(self, table)
+
         if show_steps:
             print(f"\nMostrando passos para o reconhecimento da sentença {' '.join(sentence)} com a gramática:")
             print(self)
@@ -357,9 +435,11 @@ class CFG:
                 print(f'FOLLOW({symbol}) = {follow}')
 
         stack = ["$", self.initial]
-        sentence += '$'  # adiciona fim da leitura
+        sentence = sentence.split(' ')
+        sentence.append('$')  # adiciona fim da leitura
         i = 0
         symbol = sentence[i]
+
         while stack != ['$'] and i < len(sentence):
             if show_steps:
                 print(f'Cabeçote: {symbol}; Pilha: {stack}')
@@ -370,7 +450,6 @@ class CFG:
                 stack.pop()
                 continue
             if symbol not in table[stack[-1]]:
-                print('cy')
                 break
             prod = table[stack[-1]][symbol]
             stack.pop()
@@ -379,8 +458,9 @@ class CFG:
             elif prod:
                 for p in reversed(prod):
                     stack.append(p)
+
         output = 'aceita' if stack == ["$"] else 'rejeita'
         if show_steps:
             print(f'Cabeçote: {symbol}; Pilha: {stack}')
             print(f'\n{output} sentença')
-        return stack == ["$"]
+        return stack == ["$"] and sentence[i] == "$"

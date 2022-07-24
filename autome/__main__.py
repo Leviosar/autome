@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from pprint import pprint
 import click
 from autome.finite_automata.parsers import JSONConverter
 from autome.grammars.cfg import CFG
@@ -23,20 +24,27 @@ def lexico(input: Path, source: Path, output: Path):
             print(f"Invalid input format: {''.join(other)}")
             exit()
 
-    lexer.run(source)
-    
+    tokens = lexer.run(source)
+
+    grammar = CFG.parse(input)
+
+    validated = grammar.accept(' '.join([token.type for token in tokens]), True)
+
+    print(validated)
+
     if output is not None:
         lexer.save(output)
-    
+
 @cli.command()
 @click.argument("input")
 def sin(input: Path):
     cfg = CFG.parse(input)
     print(cfg)
-    print(cfg.calculateFirst())
-    print(cfg.calculateFollow())
-    print(cfg.left_factoring())
-    print(cfg.accept("0101a0101".strip(), True))
+    cfg.calculate_first()
+    cfg.calculate_follow()
+    cfg.eliminate_left_recursion()
+    cfg.left_factoring()
+    print(cfg.accept("binary operator binary".strip(), True))
 
 if __name__ == '__main__':
     cli()

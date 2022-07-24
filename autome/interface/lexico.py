@@ -206,4 +206,5 @@ class Lexico:
             data.append([entry.type, entry.value])
         print(tabulate(data, headers=["TokenType", "Value"], tablefmt="fancy_grid"))
 
+        print(found)
         return found

@@ -1,0 +1,22 @@
+{
+    "version": "1.0.0",
+    "reserved-keywords": ["const"],
+    "definitions": [
+        {"name": "digit", "expression": "0|1"}
+    ],
+    "tokens": [
+        {"name": "binary", "expression": "(0|1)*"},
+        {"name": "operator", "expression": "a n d|o r"}
+    ],
+    "grammar": {
+        "nonterminals": ["E", "T", "F", "P"],
+        "terminals": ["+", "-", "*", "/", "(", ")", "id", "**", "cte", "&"],
+        "initial": "E",
+        "productions": [
+            {"head": "E", "body": "E + T|E - T|T"},
+            {"head": "T", "body": "T * F|F|T / F"},
+            {"head": "F", "body": "F ** P|P"},
+            {"head": "P", "body": "( E )|id|cte"}
+        ]
+    }
+}
