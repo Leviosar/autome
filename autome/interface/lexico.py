@@ -13,6 +13,7 @@ from autome.regex import Regex, lexer
 from autome.regex.blocks import UnionAutomata
 from tabulate import tabulate
 
+
 @dataclass
 class Definition:
     name: str
@@ -21,9 +22,10 @@ class Definition:
 
     def __repr__(self):
         return f"{self.name} => {self.expression}"
-    
+
     def dict(self):
         return {"name": self.name, "expression": self.expression}
+
 
 @dataclass
 class Token:
@@ -33,9 +35,10 @@ class Token:
     def __repr__(self) -> str:
         return f"{self.type}:{self.value}"
 
+
 class Lexico:
     """
-        Interface for generating lexical analyzers using Thompson's building algorithm
+    Interface for generating lexical analyzers using Thompson's building algorithm
     """
 
     keywords: List[str]
@@ -72,45 +75,55 @@ class Lexico:
         else:
             print(type(input))
             raise Exception("Invalid arguments")
-        
+
     @classmethod
     def parse(cls, input: Union[click.Path, pathlib.Path]):
-        """Parses the input file with the definitions of a lexical analyzer into useful data for the program
-        """
+        """Parses the input file with the definitions of a lexical analyzer into useful data for the program"""
         with open(input) as file:
             content = json.load(file)
-        
+
         instance = Lexico(None)
         instance.keywords = content["reserved-keywords"]
-        instance.definitions = [ Definition(definition["name"], definition["expression"]) for definition in content["definitions"]]
-        instance.tokens = [ Definition(definition["name"], definition["expression"]) for definition in content["tokens"]]
+        instance.definitions = [
+            Definition(definition["name"], definition["expression"])
+            for definition in content["definitions"]
+        ]
+        instance.tokens = [
+            Definition(definition["name"], definition["expression"])
+            for definition in content["tokens"]
+        ]
         instance.lexer = JSONConverter.parse(content["automata"])
-        
+
         return instance
 
     def parse_input(self, input: click.Path):
-        """Parses the input file with the definitions of a lexical analyzer into useful data for the program
-        """
+        """Parses the input file with the definitions of a lexical analyzer into useful data for the program"""
         with open(input) as file:
             content = json.load(file)
-        
+
         self.keywords = content["reserved-keywords"]
-        self.definitions = [ Definition(definition["name"], definition["expression"]) for definition in content["definitions"]]
-        self.tokens = [ Definition(definition["name"], definition["expression"]) for definition in content["tokens"]]
-    
+        self.definitions = [
+            Definition(definition["name"], definition["expression"])
+            for definition in content["definitions"]
+        ]
+        self.tokens = [
+            Definition(definition["name"], definition["expression"])
+            for definition in content["tokens"]
+        ]
+
     def save(self, output: click.Path) -> None:
         converter = JSONConverter()
-        
+
         model = converter.serialize(self.lexer)
-        
+
         data = {
-            'reserved-keywords': self.keywords,
-            'definitions': [definition.dict() for definition in self.definitions],
-            'tokens': [token.dict() for token in self.tokens],
-            'automata': model,
+            "reserved-keywords": self.keywords,
+            "definitions": [definition.dict() for definition in self.definitions],
+            "tokens": [token.dict() for token in self.tokens],
+            "automata": model,
         }
-        
-        with open(output, 'w+') as fp:
+
+        with open(output, "w+") as fp:
             fp.write(json.dumps(data))
 
     def build_lexer(self) -> DeterministicFiniteAutomata:
@@ -122,7 +135,7 @@ class Lexico:
         """
         data = self.definitions + self.tokens
         data = [[entry.name, entry.expression] for entry in data]
-        
+
         headers = ["Nome", "Expressão"]
         print(tabulate(data, headers=headers, tablefmt="fancy_grid"))
 
@@ -130,17 +143,21 @@ class Lexico:
         for token in self.tokens:
             for definition in self.definitions:
                 if definition.name in token.expression:
-                    token.expression = token.expression.replace(definition.name, f"({definition.expression})")
+                    token.expression = token.expression.replace(
+                        definition.name, f"({definition.expression})"
+                    )
 
             for defined_token in defined_tokens:
                 if defined_token.name in token.expression:
-                    token.expression = token.expression.replace(defined_token.name, f"({defined_token.expression})")
+                    token.expression = token.expression.replace(
+                        defined_token.name, f"({defined_token.expression})"
+                    )
 
             token.regex = Regex(token.expression)
             defined_tokens.append(token)
 
         for i in range(len(self.tokens)):
-            if (i == 0):
+            if i == 0:
                 first = self.tokens[i].regex.automata()
                 for state in first.final():
                     state.type = self.tokens[i].name
@@ -151,14 +168,14 @@ class Lexico:
                 for state in next.final():
                     state.type = self.tokens[i].name
                 machine = UnionAutomata(machine, next)
-        
+
         print("Espera um pouquinho que eu sou meio devagar...")
         return machine.determinize().clone().minimize()
 
     def run(self, code: click.Path) -> List[Dict[str, str]]:
         """
         Evaluates a given source code with a previously built lexer.
-        
+
         If at any time there's a symbol the DFA can't recognize, or a invalid token pattern, raises an
         exception. Otherwise, returns a list of the recognized tokens.
         """
@@ -169,13 +186,13 @@ class Lexico:
             source = source_file.read()
 
         source = source.strip()
-        
+
         data = []
         lines = source.split("\n")
         for index, line in enumerate(lines):
             data.append([index, line])
         print(tabulate(data, headers=["Source code"], tablefmt="fancy_grid"))
-        
+
         found: List[Token] = []
 
         i = 0
@@ -184,19 +201,19 @@ class Lexico:
 
             while i < len(source) and source[i] != " " and source[i] != "\n":
                 word += source[i]
-                i +=1
-            
+                i += 1
+
             if word in self.keywords:
-                found.append(Token('keyword', word))
+                found.append(Token("keyword", word))
                 i += 1
                 continue
-            
-            if (self.lexer.accepts(word)):
+
+            if self.lexer.accepts(word):
                 type = self.lexer.step_stack[-1].destiny.type
-                
+
                 found.append(Token(type, word))
             else:
-                if (word != ""):
+                if word != "":
                     raise Exception(f"Lexical Error {word}")
 
             i += 1

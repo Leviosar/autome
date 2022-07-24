@@ -1,9 +1,10 @@
 from tabulate import tabulate
 
+
 def display_analysis_table(grammar, table):
     return
     print("TABLE")
-    headers = ['...'] + grammar.terminals
+    headers = ["..."] + grammar.terminals
     data = []
 
     for row in table:

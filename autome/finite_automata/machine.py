@@ -83,15 +83,17 @@ class DeterministicFiniteAutomata(BaseMachine):
         """
         self.current_state = self.initial()
 
-        if (debug):
+        if debug:
             print(f"Starting at {self.current_state}")
 
         for character in word:
             result = self.step(character)
             if not result:
                 return False
-            if (debug):
-                print(f"Transition to {self.current_state} by {self.step_stack[-1].symbol}")
+            if debug:
+                print(
+                    f"Transition to {self.current_state} by {self.step_stack[-1].symbol}"
+                )
 
         return self.current_state.accept
 
@@ -271,7 +273,9 @@ class DeterministicFiniteAutomata(BaseMachine):
         new_transitions = []
 
         for original in self.states:
-            new = State(accept=original.accept, initial=original.initial, type=original.type)
+            new = State(
+                accept=original.accept, initial=original.initial, type=original.type
+            )
             mapping[original] = new
             new_states.append(new)
 
@@ -286,17 +290,16 @@ class DeterministicFiniteAutomata(BaseMachine):
 
         return DeterministicFiniteAutomata(new_states, new_transitions)
 
-
     def minimize(self) -> "DeterministicFiniteAutomata":
         for state in self.states:
             if not state.accept and len(self.transition_map[state]) == 0:
                 print(f"{state} is dead")
-        
+
         visited = set()
 
         for transition in self.transitions:
             visited.add(transition.destiny)
-        
+
         visited.add(self.initial())
 
         mapping = {}
@@ -307,19 +310,19 @@ class DeterministicFiniteAutomata(BaseMachine):
             new = State(accept=state.accept, initial=state.initial, type=state.type)
             mapping[state] = new
             states.append(new)
-        
+
         for transition in self.transitions:
             try:
                 new = Transition(
-                    mapping[transition.origin], mapping[transition.destiny], transition.symbol
+                    mapping[transition.origin],
+                    mapping[transition.destiny],
+                    transition.symbol,
                 )
                 transitions.append(new)
             except:
                 pass
 
         return DeterministicFiniteAutomata(states, transitions)
-
-
 
     # Dunder methods to allow operator overloading
     def __or__(self, other):
@@ -408,7 +411,6 @@ class NonDeterministicFiniteAutomata(DeterministicFiniteAutomata):
 
         return (closure, accept)
 
-
     def determinize(self) -> "DeterministicFiniteAutomata":
         """Determinizes a NDFA, returning an equivalent DFA
 
@@ -435,13 +437,13 @@ class NonDeterministicFiniteAutomata(DeterministicFiniteAutomata):
 
             # Adiciona o novo estado na lista de estados do autômato determinístico
             new.add_state(closure_state)
-            
+
             # Pra cada simbolo do alfabeto
             for symbol in symbols:
                 # Pula epsilon
                 if symbol == "&":
                     continue
-                
+
                 reached_from_closure = set()
 
                 # Pra cad estado no fecho original
@@ -456,7 +458,7 @@ class NonDeterministicFiniteAutomata(DeterministicFiniteAutomata):
                 # Se o conjunto estiver vazio, pula o simbolo
                 if len(reached_from_closure) == 0:
                     continue
-                
+
                 # Calcula um novo fecho
                 (closure, _) = self.e_closure(list(reached_from_closure))
 

@@ -26,9 +26,7 @@ class Transition:
         """
         Returns a new instance of Transition based on the contents of @model. This function was written to be used within Machine.parse
         """
-        find_origin: Callable[[State], str] = (
-            lambda state: state.uid == model["origin"]
-        )
+        find_origin: Callable[[State], str] = lambda state: state.uid == model["origin"]
         origin = next(filter(find_origin, states))
 
         find_destiny: Callable[[State], str] = (
@@ -40,16 +38,14 @@ class Transition:
 
     def to_json(self) -> Dict:
         return {
-            'origin': self.origin.uid,
-            'destiny': self.destiny.uid,
-            'symbol': self.symbol,
+            "origin": self.origin.uid,
+            "destiny": self.destiny.uid,
+            "symbol": self.symbol,
         }
 
     @classmethod
     def from_json(cls, model: Dict, states: List[State]) -> "Transition":
-        find_origin: Callable[[State], str] = (
-            lambda state: state.uid == model["origin"]
-        )
+        find_origin: Callable[[State], str] = lambda state: state.uid == model["origin"]
         origin = next(filter(find_origin, states))
 
         find_destiny: Callable[[State], str] = (

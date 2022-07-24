@@ -6,7 +6,9 @@
     ],
     "tokens": [
         {"name": "binary", "expression": "(0|1)*"},
-        {"name": "operator", "expression": "a n d|o r"}
+        {"name": "operator", "expression": "a n d|o r"},
+        {"name": "left_parenthesis", "expression": "("},
+        {"name": "right_parenthesis", "expression": ")"}
     ],
     "grammar": {
         "nonterminals": ["S"],

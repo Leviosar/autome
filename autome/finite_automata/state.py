@@ -4,6 +4,7 @@ from itertools import count
 from time import time
 from uuid import uuid4
 
+
 class State:
     _ids = count(0)
 
@@ -11,12 +12,20 @@ class State:
     A possible State of a Finite Automata.
     """
 
-    def __init__(self, name: str = None, initial=False, accept=False, type=None, uid=None, parts=[]) -> None:
+    def __init__(
+        self,
+        name: str = None,
+        initial=False,
+        accept=False,
+        type=None,
+        uid=None,
+        parts=[],
+    ) -> None:
         self.initial: bool = initial
         self.accept: bool = accept
         self.id = next(self._ids)
         self.type: str = type
-        self.parts: List[float] = parts 
+        self.parts: List[float] = parts
 
         if uid is not None:
             self.uid = uid
@@ -37,16 +46,16 @@ class State:
             model.get("name"),
             initial=model.get("initial"),
             accept=model.get("accept"),
-            uid=model.get("uid")
+            uid=model.get("uid"),
         )
 
     def to_json(self) -> Dict:
         return {
-            'name': self.name,
-            'initial': self.initial,
-            'accept': self.accept,
-            'uid': self.uid,
-            'type': self.type
+            "name": self.name,
+            "initial": self.initial,
+            "accept": self.accept,
+            "uid": self.uid,
+            "type": self.type,
         }
 
     @classmethod
@@ -68,7 +77,7 @@ class State:
 
         names = list(map(lambda state: state.name, states))
         names.sort()
-        name = '.'.join(names)
+        name = ".".join(names)
 
         accept = len(list(filter(lambda state: state.accept, states))) > 0
         initial = len(list(filter(lambda state: state.initial, states))) > 0
@@ -95,16 +104,16 @@ class State:
     def __eq__(self, other):
         if type(other) != State:
             return False
-        
+
         # Problema: criar uma forma de identificação para estados que atenda os requisitos:
         #   - O identificador deve ser globalmente único, para permitir save/parse
         #   - Ao criar estados com State.join(), sempre que fizer join(a,b,c) o estado resultante deve possuir o mesmo identificador
 
         # if (len(self.parts) > 0 and len(other.parts) > 0):
-            # print(self.parts)
-            # print(other.parts)
-            # print(self.parts == other.parts)
-            # return self.parts == other.parts
+        # print(self.parts)
+        # print(other.parts)
+        # print(self.parts == other.parts)
+        # return self.parts == other.parts
 
         return self.name == other.name
 

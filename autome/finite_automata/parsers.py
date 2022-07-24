@@ -108,37 +108,41 @@ class JSONConverter:
         elif isinstance(source, Path):
             with open(source, "r", encoding="utf8") as file:
                 model = json.loads(file.read())
-                
+
         states = [State.from_json(state) for state in model["states"]]
         transitions = [
             Transition.from_json(transition, states)
             for transition in model["transitions"]
         ]
-        
+
         if deterministic:
             return DeterministicFiniteAutomata(states=states, transitions=transitions)
         else:
             return NonDeterministicFiniteAutomata(
                 states=states, transitions=transitions
             )
-            
+
     @classmethod
     def serialize(
         cls, source: Union[DeterministicFiniteAutomata, NonDeterministicFiniteAutomata]
     ) -> Dict:
         model = {}
-        model['states'] = [state.to_json() for state in source.states]
-        model['transitions'] = [transition.to_json() for transition in source.transitions]
-        
+        model["states"] = [state.to_json() for state in source.states]
+        model["transitions"] = [
+            transition.to_json() for transition in source.transitions
+        ]
+
         return model
 
     @classmethod
     def save(
-        cls, source: Union[DeterministicFiniteAutomata, NonDeterministicFiniteAutomata], output: Path
+        cls,
+        source: Union[DeterministicFiniteAutomata, NonDeterministicFiniteAutomata],
+        output: Path,
     ):
         model = cls.serialize(source)
 
-        with open(output, 'w+') as fp:
+        with open(output, "w+") as fp:
             fp.write(json.dumps(model))
-        
+
         print(f"Automato salvo em {output}")

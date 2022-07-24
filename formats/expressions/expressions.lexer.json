@@ -5,18 +5,30 @@
         {"name": "digit", "expression": "0|1"}
     ],
     "tokens": [
-        {"name": "binary", "expression": "(0|1)*"},
-        {"name": "operator", "expression": "a n d|o r"}
+        {"name": "binary", "expression": "(digit)*"},
+        {"name": "first_operator", "expression": "+|-"},
+        {"name": "second_operator", "expression": "@|/"},
+        {"name": "third_operator", "expression": "%"},
+        {"name": "left_parenthesis", "expression": "["},
+        {"name": "right_parenthesis", "expression": "]"}
     ],
     "grammar": {
         "nonterminals": ["E", "T", "F", "P"],
-        "terminals": ["+", "-", "*", "/", "(", ")", "id", "**", "cte", "&"],
+        "terminals": [
+            "binary",
+            "first_operator",
+            "second_operator",
+            "third_operator",
+            "left_parenthesis",
+            "right_parenthesis",
+            "&"
+        ],
         "initial": "E",
         "productions": [
-            {"head": "E", "body": "E + T|E - T|T"},
-            {"head": "T", "body": "T * F|F|T / F"},
-            {"head": "F", "body": "F ** P|P"},
-            {"head": "P", "body": "( E )|id|cte"}
+            {"head": "E", "body": "E first_operator T|T"},
+            {"head": "T", "body": "T second_operator F|F"},
+            {"head": "F", "body": "F third_operator P|P"},
+            {"head": "P", "body": "left_parenthesis E right_parenthesis|binary"}
         ]
     }
 }
