@@ -1,9 +1,10 @@
 {
     "version": "1.0.0",
-    "reserved-keywords": ["if", "else", "while", "return", "const"],
+    "description": "Describes a simple programming language with type hints",
+    "reserved-keywords": ["else", "while", "return", "const"],
     "definitions": [
-        {"name": "digit", "expression": "0|1|2|3|4|5|6|7|8|9"},
-        {"name": "letter", "expression": "a|b|c|d|e"},
+        {"name": "digit", "expression": "0|1"},
+        {"name": "letter", "expression": "a|b"},
         {"name": "int_t", "expression": "i n t"},
         {"name": "bool_t", "expression": "b o o l"},
         {"name": "float_t", "expression": "f l o a t"},
@@ -11,14 +12,47 @@
     ],
     "tokens": [
         {"name": "type", "expression": "int_t|bool_t|float_t|string_t"},
-        {"name": "identifier", "expression": "$ letter (letter|digit)*"},
-        {"name": "attribution", "expression": "="},
-        {"name": "comparison_operator", "expression": ">|(> =)|<|(< =)|(= =)|(! =)"},
-        {"name": "arithimetic_operator", "expression": "+|-"},
-        {"name": "left_curly", "expression": "{"},
-        {"name": "right_curly", "expression": "}"},
+        {"name": "id", "expression": "$ letter (letter|digit)*"},
+        {"name": "attr", "expression": "="},
+        {"name": "c_op", "expression": ">|(> =)|<|(< =)|(= =)|(! =)"},
+        {"name": "a_op", "expression": "+|-"},
+        {"name": "l_curly", "expression": "{"},
+        {"name": "r_curly", "expression": "}"},
         {"name": "boolean", "expression": "(t r u e)|(f a l s e)"},
         {"name": "integer", "expression": "digit digit*"},
-        {"name": "float", "expression": "(digit)* . digit digit*"}
-    ]
+        {"name": "float", "expression": "(digit)* . digit digit*"},
+        {"name": "if", "expression": "i f"}
+    ],
+    "grammar": {
+        "nonterminals": [
+            "S",
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+        ],
+        "terminals": [
+            "type",
+            "id",
+            "attr",
+            "c_op",
+            "a_op",
+            "l_curly",
+            "r_curly",
+            "boolean",
+            "integer",
+            "float",
+            "if"
+        ],
+        "initial": "S",
+        "productions": [
+            {"head": "S", "body": "A|C|D|E"},
+            {"head": "A", "body": "type id attr B"},
+            {"head": "B", "body": "integer|float|boolean"},
+            {"head": "C", "body": "id c_op id"},
+            {"head": "D", "body": "if C l_curly S r_curly"},
+            {"head": "E", "body": "id attr B"}
+        ]
+    }
 }

@@ -25,6 +25,10 @@ def lexico(input: Path, source: Path, output: Path):
     lines = code.split("\n")
     
     for index, line in enumerate(lines):
+        # Handling blank lines
+        if line.strip() == '':
+            continue
+
         try:
             tokens = lexer.run(line)
             parser.validate(tokens)

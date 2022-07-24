@@ -1,8 +1,9 @@
 import json
+from pprint import pprint
 import click
 
 from typing import List
-
+from tabulate import tabulate
 from autome.utils.dataclasses import Token
 from autome.utils.errors import SyntaxException
 
@@ -59,7 +60,11 @@ class CFG:
         return CFG(nonterminals, terminals, initial, productions)
 
     def calculate_first(self):
-        """Calcula o conjunto first da gramática"""
+        """Calculate the 'first' set of all the symbols in the grammar
+
+        Returns:
+            Dict: mapping of the sets containing the 'first', indexed by symbol
+        """        
         self.first.clear()
 
         # First(a) = {a}
@@ -101,6 +106,14 @@ class CFG:
         return self.first
 
     def first_of_sequence(self, sequence):
+        """Return the first set of a sequence (calculating nullable symbols)
+
+        Args:
+            sequence List[str]: the input sequence
+
+        Returns:
+            Set[str]: the set holding the firsts of the sequence
+        """        
         firsts = set()
 
         for index, symbol in enumerate(sequence):
@@ -117,7 +130,11 @@ class CFG:
         return firsts
 
     def calculate_follow(self):
-        """Calcula o conjunto follow dos não-terminais da gramática"""
+        """Calculate the follow set for all the nonterminals in the grammar 
+
+        Returns:
+            Dict: mapping with all the follow sets, indexed by nonterminals
+        """
         self.follow.clear()
 
         self.calculate_first()
@@ -162,6 +179,11 @@ class CFG:
         return self.follow
 
     def eliminate_direct_left_recursion(self, symbol):
+        """Helper to eliminate direct left recursion on a given symbol
+
+        Args:
+            symbol String: the non terminal holding the left recursion
+        """        
         alphas = list()
         betas = list()
         newSymbol = f"{symbol}'"
@@ -185,7 +207,11 @@ class CFG:
             self.productions[symbol] = betas
 
     def eliminate_left_recursion(self):
-        """Retorna uma gramática equivalente, eliminando recursão a esquerda"""
+        """Eliminate left recursion by manipulating the grammar and passing the recursion to the right of the productions
+
+        Returns:
+            Grammar: the altered grammar
+        """        
 
         for symbol in self.nonterminals:
             self.eliminate_direct_left_recursion(symbol)
@@ -207,7 +233,17 @@ class CFG:
         return self
 
     def left_factoring(self, *, iters=10):
-        """Fatoração de GLC"""
+        """Procedure for removing non-determinism on the grammar. While removing direct determinism, you can create
+        a new non-determinism in another production and this can occur in a loop, so this proccess is not decidible
+        by a Turing Machine. Hence, this function tries up to @iters times to remove, if after this number of
+        iterations the grammar keeps changing, we return false and you should stop the execution of your program
+
+        Args:
+            iters (int, optional): Total iterations. Defaults to 10.
+
+        Returns:
+            boolean: true if the grammar could be factorated, false otherwise.
+        """        
         self.remove_direct_non_determinism()
 
         for _ in range(iters):
@@ -223,12 +259,22 @@ class CFG:
         return True
 
     def derive(self, prod):
-        """Gera lista de cadeias derivadas da produção"""
+        """Recursively returns a list of all derivations that can be made by a given production
+
+        Args:
+            prod List[string]: list of symbols representing a production
+
+        Returns:
+            List[List[string]]: all the derivations that can be generated starting at the given production
+        """        
         if not prod:
             return [[]]
+        
         prod_ = prod[0]
+        
         if prod_ in self.terminals:
             return [[prod_] + derivation for derivation in self.derive(prod[1:])]
+
         elif prod_ in self.productions:
             out = []
             derivations = self.derive(prod[1:])
@@ -243,7 +289,8 @@ class CFG:
             return out
 
     def remove_direct_non_determinism(self):
-        """Remoção de não determinismo direto"""
+        """Searches for direct non-determinism and removes them by factoring the grammar to the left
+        """        
         productions = self.productions
         new = {}
 
@@ -293,13 +340,26 @@ class CFG:
                         new[symbol].append(p)
                 else:
                     new[nonterminal].append(pref)
+
         self.productions = new
 
     def remove_indirect_non_determinism(self):
-        """Identifica e remove os indeterminismos indiretos utilizando os conjuntos FIRST"""
+        """Search for indirect non-determinisms and removes them by transforming into direct
+        nondeterminisms using sucessive derivations
+
+        Returns:
+            boolean: true if the function modified the grammar, false otherwise
+        """        
 
         def get_firsts_chain(chain):
-            """Helper para atualizar e buscar o first do primeiro simbolo da cadeia"""
+            """Returns the first set of an entire sequence of symbols
+
+            Args:
+                chain List[String]: the chain for which the first should be calculated
+
+            Returns:
+                List[String]: A list containing First(@chain)
+            """            
             self.calculate_first()
 
             if chain[0] == "&":
@@ -351,7 +411,11 @@ class CFG:
         return changed
 
     def table(self):
-        """Gera tabela de parse LL(1)"""
+        """Mounts the syntax analysis table for the LL(1) algorithim using first and follow.
+
+        Returns:
+            Dict: the table containing all the information needed for LL(1) parsing
+        """        
         self.calculate_first()
         self.calculate_follow()
 
@@ -384,15 +448,61 @@ class CFG:
 
         return table
 
+    def display_analysis_table(self, table):
+        print("\nLL(1) analysis table\n")
+        m = len(self.terminals) + 2
+        n = len(self.nonterminals) + 2
+
+        data = [["-" for i in range(m)] for j in range(n)]
+        for column in range(1, n):
+            data[column][0] = self.nonterminals[column - 2]
+        
+        for row in range(1, m):
+            if (row == len(self.terminals) + 1):
+                data[0][row] = "$"
+            else: 
+                data[0][row] = self.terminals[row - 2]
+
+
+        for column in range(1, n):
+            for row in range(1, m):
+                if (data[0][row] == "$"):
+                    nonterminal = data[column][0]
+                    terminal = "$"
+                else:
+                    nonterminal = data[column][0]
+                    terminal = data[0][row]
+                
+                try:
+                    data[column][row] = " ".join(table[nonterminal][terminal])
+                except KeyError:
+                    pass
+
+        print(tabulate(data, tablefmt="fancy_grid"))
+
+
     def accept(self, tokens: List[Token], debug=False):
-        """Reconhece sentença via implementação de um analisador LL(1)"""
+        """Validates a sequence of tokens using the LL(1) parser. This wrapper already
+        calculate First and Follow sets, eliminates left recursion and apply left factoring
+        to remove non-determinism to the grammar.
+
+        Args:
+            tokens (List[Token]): List of tokens to be validated
+            debug (bool, optional): Debug level flag. Defaults to False.
+
+        Raises:
+            SyntaxException: if a syntax error is found
+
+        Returns:
+            boolean: the result of the validation
+        """        
         self.calculate_first()
         self.calculate_follow()
         self.eliminate_left_recursion()
         self.left_factoring()
 
         table = self.table()
-
+        self.display_analysis_table(table)
         stack = ["$", self.initial]
 
         sentence = " ".join([token.type for token in tokens])
@@ -400,6 +510,9 @@ class CFG:
         sentence.append("$")
         i = 0
         symbol = sentence[i]
+
+        if debug:
+            print("\nLL(1) recognition stack:\n")
 
         while stack != ["$"] and i < len(sentence):
             if debug:
@@ -429,9 +542,7 @@ class CFG:
                 for p in reversed(prod):
                     stack.append(p)
 
-        accepted = stack == ["$"] and sentence[i] == "$"
-
         if debug:
             print(f"Input: {symbol}; Stack: {stack}")
 
-        return accepted
+        return stack == ["$"] and sentence[i] == "$"

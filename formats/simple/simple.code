@@ -1,9 +1,5 @@
-$a = 2
-$b = 3
-bool $c = false
+$a = 0
+$b = 1
+bool $b1 = false
 
-if $a > $b {
-    $a = $b
-    $a = $a + 1
-    return
-}
+if $a > $b { $a = true }
