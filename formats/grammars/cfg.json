@@ -1,8 +1,0 @@
-{
-    "nonterminals": ["S", "A", "B"],
-    "terminals": ["a", "b"],
-    "start": "S",
-    "productions": [
-        {}
-    ]
-}

@@ -1,6 +1,6 @@
 import json
 
-from autome.finite_automata import (
+from autome.automatas.finite_automata import (
     State,
     Transition,
     DeterministicFiniteAutomata,

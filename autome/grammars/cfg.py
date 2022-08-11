@@ -64,7 +64,7 @@ class CFG:
 
         Returns:
             Dict: mapping of the sets containing the 'first', indexed by symbol
-        """        
+        """
         self.first.clear()
 
         # First(a) = {a}
@@ -113,7 +113,7 @@ class CFG:
 
         Returns:
             Set[str]: the set holding the firsts of the sequence
-        """        
+        """
         firsts = set()
 
         for index, symbol in enumerate(sequence):
@@ -130,7 +130,7 @@ class CFG:
         return firsts
 
     def calculate_follow(self):
-        """Calculate the follow set for all the nonterminals in the grammar 
+        """Calculate the follow set for all the nonterminals in the grammar
 
         Returns:
             Dict: mapping with all the follow sets, indexed by nonterminals
@@ -158,6 +158,9 @@ class CFG:
 
                         # This means that this nonterminal is the last in the production
                         if len(sequence) == 0:
+                            # if production == ['&']:
+                            #     continue
+
                             follows[symbol] = follows[symbol].union(follows[head])
 
                             continue
@@ -183,7 +186,7 @@ class CFG:
 
         Args:
             symbol String: the non terminal holding the left recursion
-        """        
+        """
         alphas = list()
         betas = list()
         newSymbol = f"{symbol}'"
@@ -211,7 +214,7 @@ class CFG:
 
         Returns:
             Grammar: the altered grammar
-        """        
+        """
 
         for symbol in self.nonterminals:
             self.eliminate_direct_left_recursion(symbol)
@@ -243,7 +246,7 @@ class CFG:
 
         Returns:
             boolean: true if the grammar could be factorated, false otherwise.
-        """        
+        """
         self.remove_direct_non_determinism()
 
         for _ in range(iters):
@@ -266,12 +269,12 @@ class CFG:
 
         Returns:
             List[List[string]]: all the derivations that can be generated starting at the given production
-        """        
+        """
         if not prod:
             return [[]]
-        
+
         prod_ = prod[0]
-        
+
         if prod_ in self.terminals:
             return [[prod_] + derivation for derivation in self.derive(prod[1:])]
 
@@ -289,8 +292,7 @@ class CFG:
             return out
 
     def remove_direct_non_determinism(self):
-        """Searches for direct non-determinism and removes them by factoring the grammar to the left
-        """        
+        """Searches for direct non-determinism and removes them by factoring the grammar to the left"""
         productions = self.productions
         new = {}
 
@@ -349,7 +351,7 @@ class CFG:
 
         Returns:
             boolean: true if the function modified the grammar, false otherwise
-        """        
+        """
 
         def get_firsts_chain(chain):
             """Returns the first set of an entire sequence of symbols
@@ -359,7 +361,7 @@ class CFG:
 
             Returns:
                 List[String]: A list containing First(@chain)
-            """            
+            """
             self.calculate_first()
 
             if chain[0] == "&":
@@ -415,7 +417,7 @@ class CFG:
 
         Returns:
             Dict: the table containing all the information needed for LL(1) parsing
-        """        
+        """
         self.calculate_first()
         self.calculate_follow()
 
@@ -456,30 +458,28 @@ class CFG:
         data = [["-" for i in range(m)] for j in range(n)]
         for column in range(1, n):
             data[column][0] = self.nonterminals[column - 2]
-        
-        for row in range(1, m):
-            if (row == len(self.terminals) + 1):
-                data[0][row] = "$"
-            else: 
-                data[0][row] = self.terminals[row - 2]
 
+        for row in range(1, m):
+            if row == len(self.terminals) + 1:
+                data[0][row] = "$"
+            else:
+                data[0][row] = self.terminals[row - 2]
 
         for column in range(1, n):
             for row in range(1, m):
-                if (data[0][row] == "$"):
+                if data[0][row] == "$":
                     nonterminal = data[column][0]
                     terminal = "$"
                 else:
                     nonterminal = data[column][0]
                     terminal = data[0][row]
-                
+
                 try:
                     data[column][row] = " ".join(table[nonterminal][terminal])
                 except KeyError:
                     pass
 
         print(tabulate(data, tablefmt="fancy_grid"))
-
 
     def accept(self, tokens: List[Token], debug=False):
         """Validates a sequence of tokens using the LL(1) parser. This wrapper already
@@ -495,7 +495,7 @@ class CFG:
 
         Returns:
             boolean: the result of the validation
-        """        
+        """
         self.calculate_first()
         self.calculate_follow()
         self.eliminate_left_recursion()

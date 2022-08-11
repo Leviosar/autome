@@ -2,8 +2,8 @@ from copy import deepcopy
 import pdb
 from tabulate import tabulate
 from typing import Callable, Dict, List, Set, Tuple
-from autome.finite_automata.state import State
-from autome.finite_automata.transition import Transition
+from autome.automatas.finite_automata.state import State
+from autome.automatas.finite_automata.transition import Transition
 from autome.base_machine import BaseMachine
 
 

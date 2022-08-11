@@ -1,4 +1,4 @@
-from autome.finite_automata.state import State
+from autome.automatas.finite_automata.state import State
 from typing import Callable, Dict, List
 
 

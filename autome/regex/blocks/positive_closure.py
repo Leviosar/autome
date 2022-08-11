@@ -1,8 +1,8 @@
-from autome.finite_automata.machine import (
+from autome.automatas.finite_automata.machine import (
     NonDeterministicFiniteAutomata,
 )
-from autome.finite_automata.state import State
-from autome.finite_automata.transition import Transition
+from autome.automatas.finite_automata.state import State
+from autome.automatas.finite_automata.transition import Transition
 
 
 class PositiveClosureAutomata(NonDeterministicFiniteAutomata):

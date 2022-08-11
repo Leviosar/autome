@@ -1,6 +1,6 @@
-from autome.turing_machine.state import State
-from autome.turing_machine.tape import Tape
-from autome.turing_machine.transition import Transition
+from autome.automatas.turing_machine.state import State
+from autome.automatas.turing_machine.tape import Tape
+from autome.automatas.turing_machine.transition import Transition
 from typing import List, Callable, Deque
 from pathlib import Path
 from collections import deque
@@ -27,7 +27,7 @@ class BaseMachine:
         if branches is not None:
             self.branches = branches
         else:
-            self.branches: Deque[Machine] = deque([self])
+            self.branches: Deque[BaseMachine] = deque([self])
 
     def __repr__(self):
         return f"BaseMachine(states: {len(self.states)})"
@@ -51,7 +51,7 @@ class BaseMachine:
 
         return BaseMachine(states=states, tapes=tapes, transitions=transitions)
 
-    def clone(self) -> "Machine":
+    def clone(self) -> "BaseMachine":
         """
         Returns a clone of the calling Turing Machine. The states, transitions and branches will be shallow copies
         while the tapes are clones with differente memory spaces.

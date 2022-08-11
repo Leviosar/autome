@@ -1,5 +1,5 @@
 from pathlib import Path
-from autome.finite_automata import (
+from autome.automatas.finite_automata import (
     JFlapConverter,
     DeterministicFiniteAutomata,
     JSONConverter,

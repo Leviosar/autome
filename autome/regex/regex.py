@@ -1,4 +1,4 @@
-from autome.finite_automata.machine import NonDeterministicFiniteAutomata
+from autome.automatas import NDFA
 from autome.regex import Lexer, Parser, Interpreter
 
 
@@ -14,5 +14,5 @@ class Regex:
     def match(self, test) -> bool:
         return self.interpreter.run(self.tree).determinize().accepts(test)
 
-    def automata(self) -> NonDeterministicFiniteAutomata:
+    def automata(self) -> NDFA:
         return self.interpreter.run(self.tree)

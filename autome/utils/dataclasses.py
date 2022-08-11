@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 from autome.regex.regex import Regex
 
+
 @dataclass
 class Definition:
     name: str

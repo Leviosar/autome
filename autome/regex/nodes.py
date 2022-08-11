@@ -8,12 +8,12 @@ from autome.regex.blocks import (
     EpsilonAutomata,
 )
 
-from autome.finite_automata import NonDeterministicFiniteAutomata
+from autome.automatas import NDFA
 
 
 @dataclass
 class ParserNode:
-    def apply(self) -> "NonDeterministicFiniteAutomata":
+    def apply(self) -> "NDFA":
         raise NotImplementedError()
 
 

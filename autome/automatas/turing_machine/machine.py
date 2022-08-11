@@ -1,6 +1,6 @@
-from autome.turing_machine.state import State
-from autome.turing_machine.tape import Tape
-from autome.turing_machine.transition import Transition
+from autome.automatas.turing_machine.state import State
+from autome.automatas.turing_machine.tape import Tape
+from autome.automatas.turing_machine.transition import Transition
 from typing import List, Callable, Deque
 from pathlib import Path
 from collections import deque
