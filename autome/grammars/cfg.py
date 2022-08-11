@@ -502,7 +502,10 @@ class CFG:
         self.left_factoring()
 
         table = self.table()
-        self.display_analysis_table(table)
+
+        if debug:
+            self.display_analysis_table(table)
+        
         stack = ["$", self.initial]
 
         sentence = " ".join([token.type for token in tokens])
