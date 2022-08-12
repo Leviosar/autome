@@ -4,6 +4,7 @@ from autome.regex.parser import Parser
 
 
 def test_regex_parser():
+    """Test case for transforming a regular expression into a execution tree using the parser"""
     lexer = Lexer("(a|b)* (c|d)*")
 
     tokens = lexer.generate_tokens()

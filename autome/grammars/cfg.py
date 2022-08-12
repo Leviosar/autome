@@ -505,7 +505,7 @@ class CFG:
 
         if debug:
             self.display_analysis_table(table)
-        
+
         stack = ["$", self.initial]
 
         sentence = " ".join([token.type for token in tokens])

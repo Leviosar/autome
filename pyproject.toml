@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "autome"
-version = "0.2.1"
+version = "0.2.2"
 description = "Automata simulation with Python"
 authors = ["João Vitor Maia <maia.tostring@gmail.com>"]
 

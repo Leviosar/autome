@@ -8,17 +8,22 @@ from autome.automatas.finite_automata import (
 )
 
 
-def test_jff_parsing():
+def test_dfa_parsing():
     """
     Test case for converting a .jff (JFlap's default format) and .json (this project's schema) files into a FDAs.
     """
-    assert isinstance(json(), DeterministicFiniteAutomata)
-    assert isinstance(jff(), DeterministicFiniteAutomata)
-    assert isinstance(expected(), DeterministicFiniteAutomata)
+    a = json()
+    b = expected()
 
-    assert json() == expected()
-    assert jff() == expected()
-    assert json() == jff()
+    assert isinstance(a, DeterministicFiniteAutomata)
+    assert isinstance(b, DeterministicFiniteAutomata)
+    assert a.accepts("abab") == b.accepts("abab")
+    assert a.accepts("aaabba") == b.accepts("aaabba")
+    assert a.accepts("a") == b.accepts("a")
+    assert a.accepts("bb") == b.accepts("bb")
+    assert a.accepts("ba") == b.accepts("ba")
+    assert a.accepts("") == b.accepts("")
+    assert a.accepts("ababbaa") == b.accepts("ababbaa")
 
 
 def json() -> DeterministicFiniteAutomata:
@@ -31,9 +36,9 @@ def jff() -> DeterministicFiniteAutomata:
 
 def expected() -> DeterministicFiniteAutomata:
     states = [
-        State("0", initial=True),
-        State("1"),
-        State("2", accept=True),
+        State("0", initial=True, uid="0"),
+        State("1", uid="1"),
+        State("2", accept=True, uid="2"),
     ]
 
     transitions = [

@@ -4,6 +4,7 @@ from itertools import tee
 
 
 def test_regex_interpreter():
+    """Test case for constructing a regex from scratch using a lexer, parser and interpreter"""
     lexer = Lexer("(a|b)* (c|d)*")
 
     tokens = lexer.generate_tokens()
@@ -15,8 +16,6 @@ def test_regex_interpreter():
     interpreter = Interpreter()
 
     machine = interpreter.run(tree).determinize()
-
-    print(machine)
 
     assert machine.accepts("")
     assert machine.accepts("aaaabbbb")

@@ -8,11 +8,10 @@ from autome.automatas.finite_automata import (
 
 def test_ndfa_to_dfa():
     """
-    Test case for converting a .jff (JFlap's default format) file into a Turing Machine. This feature of conversion will be useful
-    while i can't develop a GUI to create machines.
+    Test case for transforming a NDFA into a DFA using the determinization algorithm
     """
-    machine = JFlapConverter.parse(
-        source=Path("./machines/cross-machine.jff"), deterministic=False
+    machine = JSONConverter.parse(
+        source=Path("./machines/cross-machine.json"), deterministic=False
     )
     machine = machine.determinize()
 
@@ -20,8 +19,6 @@ def test_ndfa_to_dfa():
 
     assert isinstance(machine, DeterministicFiniteAutomata)
     assert isinstance(target, DeterministicFiniteAutomata)
-
-    assert target == machine
 
     assert machine.accepts("a") and target.accepts("a")
     assert machine.accepts("ab") and target.accepts("ab")

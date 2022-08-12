@@ -3,21 +3,25 @@
     "title": "cross-machine",
     "states": [
         {
+            "uid": "0",
             "name": "0",
             "initial": true,
             "accept": false
         },
         {
+            "uid": "1",
             "name": "1",
             "initial": false,
             "accept": false
         },
         {
+            "uid": "0.2",
             "name": "0.2",
             "initial": false,
             "accept": true
         },
         {
+            "uid": "0.1.2",
             "name": "0.1.2",
             "initial": false,
             "accept": true

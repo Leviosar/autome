@@ -7,8 +7,7 @@ from autome.regex.blocks.kleene import KleeneAutomata
 
 def test_concatenation_automata():
     """
-    Test case for converting a .jff (JFlap's default format) file into a Turing Machine. This feature of conversion will be useful
-    while i can't develop a GUI to create machines.
+    Test case for creating concatenation of symbol automatas
     """
     a = SymbolAutomata("a")
     b = SymbolAutomata("b")

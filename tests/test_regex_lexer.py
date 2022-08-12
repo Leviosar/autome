@@ -3,6 +3,7 @@ from autome.regex.lexer import Lexer, Token, TokenType
 
 
 def test_regex_lexer():
+    """Test case for the lexical analysis of a regular expression"""
     lexer = Lexer("(a|b)* (c|d)*")
 
     tokens = lexer.generate_tokens()

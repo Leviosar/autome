@@ -2,10 +2,7 @@ from autome.regex.blocks import SymbolAutomata, UnionAutomata
 
 
 def test_union_automata():
-    """
-    Test case for converting a .jff (JFlap's default format) file into a Turing Machine. This feature of conversion will be useful
-    while i can't develop a GUI to create machines.
-    """
+    """Test case for building union automatas from symbol automatas"""
     a = SymbolAutomata("a")
     b = SymbolAutomata("b")
 
