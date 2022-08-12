@@ -55,6 +55,10 @@ class Lexer:
             elif self.current_char == ")":
                 self.forward()
                 yield Token(TokenType.RIGHT_PARENTHESIS)
+            elif self.current_char ==  "\\":
+                self.forward()
+                yield Token(TokenType.SYMBOL, self.current_char)
+                self.forward()
             else:
                 yield Token(TokenType.SYMBOL, self.current_char)
                 self.forward()
